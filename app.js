@@ -31,6 +31,9 @@ async function refreshAuth() {
     if (!res.ok) {
       state.user = null;
       status.textContent = 'Not signed in';
+      if (!window.location.pathname.startsWith('/.auth')) {
+        window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
+      }
       return;
     }
     const data = await res.json();
@@ -40,10 +43,18 @@ async function refreshAuth() {
     } else {
       state.user = null;
       status.textContent = 'Not signed in';
+      if (!window.location.pathname.startsWith('/.auth')) {
+        window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
+      }
+      return;
     }
   } catch (err) {
     state.user = null;
     status.textContent = 'Not signed in';
+    if (!window.location.pathname.startsWith('/.auth')) {
+      window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
+    }
+    return;
   }
   document.getElementById('loginBtn').classList.toggle('hidden', !!state.user);
   document.getElementById('logoutBtn').classList.toggle('hidden', !state.user);
