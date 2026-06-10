@@ -13,7 +13,8 @@
     },
     {
       "route": "/*",
-      "allowedRoles": ["authenticated"]
+      "serve": "/index.html",
+      "allowedRoles": ["anonymous"]
     }
   ]
 }
