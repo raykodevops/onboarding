@@ -36,6 +36,7 @@
       <div class="button-row">
         <button id="fetchPlanBtn" class="btn">Load plan from site</button>
         <button id="choosePlanFileBtn" class="btn btn-secondary">Import local plan file</button>
+        <button id="viewFullPlanBtn" class="btn btn-secondary">View full 90-day plan</button>
         <input id="planFile" type="file" accept=".md,.txt" class="hidden" />
       </div>
       <div id="planMessage" class="info-text"></div>
@@ -63,6 +64,14 @@
       </div>
       <div id="noteMessage" class="info-text"></div>
       <div id="notesList" class="notes-list"></div>
+    </section>
+    <section id="fullPlan" class="card hidden full-plan-card">
+      <div class="full-plan-header">
+        <h2>Full 90-Day Azure Onboarding Plan</h2>
+        <button id="closeFullPlanBtn" class="btn btn-secondary">Back to app</button>
+      </div>
+      <div id="fullPlanMessage" class="info-text">Loading full plan...</div>
+      <div id="fullPlanContent" class="full-plan-content"></div>
     </section>
   </main>
 

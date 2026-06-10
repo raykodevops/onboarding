@@ -20,6 +20,8 @@ function attachHandlers() {
   document.getElementById('logoutBtn').addEventListener('click', logout);
   document.getElementById('loginGateBtn').addEventListener('click', login);
   document.getElementById('fetchPlanBtn').addEventListener('click', fetchPlanFromSite);
+  document.getElementById('viewFullPlanBtn').addEventListener('click', showFullPlan);
+  document.getElementById('closeFullPlanBtn').addEventListener('click', hideFullPlan);
   document.getElementById('choosePlanFileBtn').addEventListener('click', () => document.getElementById('planFile').click());
   document.getElementById('planFile').addEventListener('change', handlePlanFile);
   document.getElementById('addNoteBtn').addEventListener('click', addNote);
@@ -63,6 +65,47 @@ async function refreshAuth() {
 
 function login() {
   window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
+}
+
+function hideFullPlan() {
+  document.getElementById('fullPlan').classList.add('hidden');
+  document.getElementById('planTabs').closest('section').classList.remove('hidden');
+  const notesSection = document.querySelector('section.card:nth-of-type(2)');
+  if (notesSection) notesSection.classList.remove('hidden');
+}
+
+function renderFullPlan(markdown) {
+  const html = markdown
+    .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+    .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+    .replace(/^\*\*([^*]+)\*\*/gm, '<strong>$1</strong>')
+    .replace(/^- \[ \] (.+)$/gm, '<li><input type="checkbox" disabled> $1</li>')
+    .replace(/^- \[x\] (.+)$/gim, '<li><input type="checkbox" checked disabled> $1</li>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br />');
+
+  return `<div>${html}</div>`;
+}
+
+async function showFullPlan() {
+  document.getElementById('fullPlan').classList.remove('hidden');
+  const planSection = document.getElementById('planTabs').closest('section');
+  if (planSection) planSection.classList.add('hidden');
+  const notesSection = document.querySelector('section.card:nth-of-type(2)');
+  if (notesSection) notesSection.classList.add('hidden');
+
+  const fullPlanContent = document.getElementById('fullPlanContent');
+  const fullPlanMessage = document.getElementById('fullPlanMessage');
+  try {
+    const res = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
+    if (!res.ok) throw new Error('Plan file not found');
+    const md = await res.text();
+    fullPlanContent.innerHTML = renderFullPlan(md);
+    fullPlanMessage.textContent = 'Complete 90-Day onboarding plan.';
+  } catch (err) {
+    fullPlanMessage.textContent = 'Unable to load full plan content.';
+  }
 }
 
 function logout() {

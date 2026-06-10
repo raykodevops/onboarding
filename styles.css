@@ -96,6 +96,45 @@ button, input, textarea {
   transition: transform 0.15s ease, background 0.15s ease;
 }
 
+.full-plan-card {
+  grid-column: 1 / -1;
+}
+
+.full-plan-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.full-plan-content {
+  margin-top: 18px;
+  line-height: 1.75;
+}
+
+.full-plan-content h2,
+.full-plan-content h3,
+.full-plan-content h4 {
+  color: #ffffff;
+}
+
+.full-plan-content ul {
+  margin: 0 0 20px 20px;
+}
+
+.full-plan-content li {
+  margin-bottom: 10px;
+}
+
+.full-plan-content p {
+  margin: 0 0 16px;
+}
+
+.hidden {
+  display: none;
+}
+
 .btn:hover {
   transform: translateY(-1px);
   background: var(--accent-strong);
