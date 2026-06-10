@@ -41,6 +41,9 @@ async function refreshAuth() {
     if (Array.isArray(data) && data.length > 0) {
       state.user = data[0];
       status.textContent = `Signed in as ${state.user.userDetails || state.user.name || 'unknown'}`;
+    } else if (data && data.clientPrincipal && typeof data.clientPrincipal === 'object' && Object.keys(data.clientPrincipal).length > 0) {
+      state.user = data.clientPrincipal;
+      status.textContent = `Signed in as ${state.user.userDetails || state.user.userId || 'unknown'}`;
     } else {
       state.user = null;
       status.textContent = 'Not signed in';
