@@ -8,12 +8,8 @@
       "allowedRoles": ["authenticated"]
     },
     {
-      "route": "/",
-      "allowedRoles": ["authenticated"]
-    },
-    {
-      "route": "/index.html",
-      "allowedRoles": ["authenticated"]
+      "route": "/*",
+      "serve": "/index.html"
     }
   ]
 }
