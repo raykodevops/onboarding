@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Azure Onboarding Runbook</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-left">
+      <div class="brand">Azure Onboarding Runbook</div>
+      <div class="tagline">Authenticated planning, notes, and sync for your Azure onboarding.</div>
+    </div>
+    <div class="header-actions">
+      <div id="authStatus" class="auth-status">Checking login...</div>
+      <div class="button-row">
+        <button id="loginBtn" class="btn">Login</button>
+        <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body">
+    <section class="card">
+      <h2>Plan import</h2>
+      <p class="muted">Load the 90-day plan and review it as week tabs.</p>
+      <div class="button-row">
+        <button id="fetchPlanBtn" class="btn">Load plan from site</button>
+        <button id="choosePlanFileBtn" class="btn btn-secondary">Import local plan file</button>
+        <input id="planFile" type="file" accept=".md,.txt" class="hidden" />
+      </div>
+      <div id="planMessage" class="info-text"></div>
+      <div id="planTabs" class="tab-bar"></div>
+      <div id="planTabContent" class="tab-panel"></div>
+    </section>
+
+    <section class="card">
+      <h2>Notes</h2>
+      <p class="muted">Save notes to Azure storage and load them from anywhere after authentication.</p>
+      <div class="form-grid">
+        <label>
+          Title
+          <input id="noteTitle" type="text" placeholder="Meeting or topic title" />
+        </label>
+        <label class="full-width">
+          Note body
+          <textarea id="noteBody" rows="6" placeholder="Write your note here..."></textarea>
+        </label>
+      </div>
+      <div class="button-row">
+        <button id="addNoteBtn" class="btn">Add note</button>
+        <button id="saveNotesBtn" class="btn btn-secondary">Save notes</button>
+        <button id="loadNotesBtn" class="btn btn-secondary">Load notes</button>
+      </div>
+      <div id="noteMessage" class="info-text"></div>
+      <div id="notesList" class="notes-list"></div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <span>Hosted as Azure Static Web App with Azure AD authentication.</span>
+    <span>Notes are stored in Azure Blob Storage via the API.</span>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

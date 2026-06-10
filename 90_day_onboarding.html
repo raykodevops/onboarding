@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>90-Day Onboarding — Interactive Runbook</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1724;
+      --panel-2:#0c1420;
+      --muted:#9aa4b2;
+      --accent:#3aa0ff;
+      --card-shadow:0 2px 8px rgba(2,6,23,0.6);
+      --input-bg:#0b1624;
+      --input-border:#16222f;
+      --text:#e6eef8;
+    }
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}
+    header{padding:18px 24px;background:linear-gradient(90deg,var(--panel),#0a4bd6);color:var(--text)}
+    .wrap{display:flex;height:calc(100vh - 64px)}
+    nav{width:300px;background:var(--panel-2);border-right:1px solid rgba(255,255,255,0.04);overflow:auto;padding:16px}
+    main{flex:1;padding:18px;overflow:auto}
+    h1,h2{margin:8px 0}
+    .card{background:var(--panel);padding:12px;border-radius:8px;box-shadow:var(--card-shadow);margin-bottom:12px}
+    label{display:block;margin:6px 0;color:var(--text)}
+    input[type=text],textarea{width:100%;padding:8px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);color:var(--text)}
+    input[type=text]::placeholder, textarea::placeholder{color:rgba(230,238,248,0.45)}
+    button{background:var(--accent);color:#021026;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+    a{color:var(--accent)}
+    .sm{padding:6px 10px;background:var(--accent);color:#021026;border-radius:6px}
+    ul.checklist{list-style:none;padding-left:0}
+    ul.checklist li{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.03);color:var(--text)}
+    .flex{display:flex;gap:8px}
+    .tab-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+    .tab-button{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);cursor:pointer;transition:background 0.2s}
+    .tab-button.active{background:var(--accent);color:#021026;border-color:rgba(58,160,255,0.7)}
+    .tab-panel{margin-top:12px}
+    .section-link{display:block;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none}
+    .section-link:hover{background:rgba(255,255,255,0.02)}
+    .top-actions{display:flex;gap:8px}
+    .muted{color:var(--muted)}
+    footer{font-size:13px;padding:12px;color:var(--muted)}
+    pre{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));padding:8px;border-radius:6px}
+    a[download]{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h1 style="font-size:18px;margin:0">90-Day Onboarding — Interactive Runbook</h1>
+        <div class="muted">Fill checklists, take notes, export progress</div>
+      </div>
+      <div class="top-actions">
+        <button id="saveBtn">Save</button>
+        <button id="loadBtn">Load</button>
+        <button id="resetBtn">Reset</button>
+        <button id="exportMdBtn">Export Markdown</button>
+        <button id="exportJsonBtn">Export JSON</button>
+      </div>
+    </div>
+  </header>
+  <div class="wrap">
+    <nav>
+      <div class="card">
+        <h2 style="font-size:16px;margin:0 0 8px 0">Quick Actions</h2>
+        <a class="section-link" href="#checklist">Checklist</a>
+        <a class="section-link" href="#lists">Create a List</a>
+        <a class="section-link" href="#notes">Notes</a>
+        <a class="section-link" href="#plan">Open Plan (MD)</a>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 6px 0">Saved States</h3>
+        <div id="savedList">No saved states</div>
+      </div>
+    </nav>
+    <main>
+      <section id="checklist" class="card">
+        <h2>Checklist</h2>
+        <p class="muted">Create quick checklist items and mark them done.</p>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input id="newChecklistItem" type="text" placeholder="Add new checklist item" />
+          <button id="addChecklist">Add</button>
+        </div>
+        <ul id="checklistUl" class="checklist"></ul>
+      </section>
+
+      <section id="lists" class="card">
+        <h2>Create a List</h2>
+        <p class="muted">Create named lists (e.g., 'Stakeholders', 'Questions').</p>
+        <label>List name</label>
+        <input id="listName" type="text" placeholder="e.g., Stakeholders" />
+        <label>Items (one per line)</label>
+        <textarea id="listItems" rows="4" placeholder="one item per line"></textarea>
+        <div style="margin-top:8px" class="flex">
+          <button id="createList">Create List</button>
+          <button id="clearLists">Clear Lists</button>
+        </div>
+        <div id="listsContainer" style="margin-top:12px"></div>
+      </section>
+
+      <section id="notes" class="card">
+        <h2>Notes</h2>
+        <p class="muted">Take free-form notes tied to a section or general.</p>
+        <label>Note title</label>
+        <input id="noteTitle" type="text" placeholder="e.g., Meeting with security team" />
+        <label>Note</label>
+        <textarea id="noteBody" rows="6" placeholder="Write your note here..."></textarea>
+        <div style="margin-top:8px" class="flex">
+          <button id="saveNote">Save Note</button>
+          <button id="exportNote">Export Note</button>
+        </div>
+        <div id="notesContainer" style="margin-top:12px"></div>
+      </section>
+
+      <section id="plan" class="card">
+        <h2>Open Plan</h2>
+        <p class="muted">Plan file is saved alongside this tool. You can open or download it.</p>
+        <div class="flex" style="margin-top:8px">
+          <a id="openMd" href="90_Day_Plan_Azure_Infrastructure_Manager.md" download>Download Plan (.md)</a>
+          <button id="viewMd">View Plan Source</button>
+          <button id="importPlan">Import Plan into Week Tabs</button>
+          <label style="display:inline-block;margin-left:8px;">
+            <input id="importFile" type="file" accept=".md,.txt" style="display:none" />
+            <button id="chooseFileBtn" type="button">Choose Plan File</button>
+          </label>
+        </div>
+        <pre id="mdPreview" style="white-space:pre-wrap;margin-top:12px;padding:8px;border-radius:6px;display:none;max-height:400px;overflow:auto;color:var(--text);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));"></pre>
+      </section>
+
+      <section id="importedPlan" class="card">
+        <h2>Imported Plan Tabs</h2>
+        <p class="muted">Each imported week or section appears here as its own tab.</p>
+        <div id="planTabs" class="tab-bar"></div>
+        <div id="planTabContent" class="tab-panel"></div>
+      </section>
+
+    </main>
+  </div>
+  <footer>
+    Saved locally in your browser (LocalStorage). Use Export to save files.
+  </footer>
+
+  <script>
+    // Basic state
+    const stateKey = 'onboard_runbook_v1';
+    let state = { checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0 };
+
+    function renderChecklist(){
+      const ul = document.getElementById('checklistUl');
+      ul.innerHTML = '';
+      state.checklist.forEach((item, idx)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<label><input data-idx="${idx}" type="checkbox" ${item.done ? 'checked' : ''}/> <strong>${escapeHtml(item.text)}</strong></label>`;
+        ul.appendChild(li);
+      });
+      document.querySelectorAll('#checklistUl input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
+        const idx = +e.target.dataset.idx; state.checklist[idx].done = e.target.checked; saveState(); renderChecklist();
+      }));
+    }
+
+    function renderLists(){
+      const c = document.getElementById('listsContainer'); c.innerHTML='';
+      state.lists.forEach((l, i)=>{
+        const div = document.createElement('div'); div.className='card';
+        div.style.marginBottom='8px';
+        // normalize items to objects {text,done}
+        l.items = l.items.map(it => typeof it === 'string' ? {text: it, done:false} : it);
+        const itemsHtml = l.items.map((it,idx)=>`<li><label><input data-list="${i}" data-idx="${idx}" type="checkbox" ${it.done? 'checked' : ''}/> ${escapeHtml(it.text)}</label></li>`).join('');
+        div.innerHTML = `<h3 style="margin:0 0 6px 0">${escapeHtml(l.name)}</h3><ul>${itemsHtml}</ul><div style="margin-top:6px"><button data-i="${i}" class="delList">Delete</button></div>`;
+        c.appendChild(div);
+      });
+      // attach handlers
+      document.querySelectorAll('.delList').forEach(b=>b.addEventListener('click',e=>{state.lists.splice(+e.target.dataset.i,1); saveState(); renderLists();}));
+      document.querySelectorAll('#listsContainer input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
+        const li = +e.target.dataset.list; const idx = +e.target.dataset.idx; state.lists[li].items[idx].done = e.target.checked; saveState(); renderLists();
+      }));
+    }
+
+    function renderNotes(){
+      const c = document.getElementById('notesContainer'); c.innerHTML='';
+      state.notes.forEach((n, i)=>{
+        const d = document.createElement('div'); d.className='card'; d.innerHTML = `<h3 style="margin:0 0 6px 0">${escapeHtml(n.title)} <span class="muted" style="font-size:12px">— ${new Date(n.t).toLocaleString()}</span></h3><div style="white-space:pre-wrap">${escapeHtml(n.body)}</div><div style="margin-top:8px"><button data-i="${i}" class="delNote">Delete</button></div>`;
+        c.appendChild(d);
+      });
+      document.querySelectorAll('.delNote').forEach(b=>b.addEventListener('click',e=>{state.notes.splice(+e.target.dataset.i,1); saveState(); renderNotes();}));
+    }
+
+    function renderPlanTabs(){
+      const tabs = document.getElementById('planTabs');
+      const content = document.getElementById('planTabContent');
+      tabs.innerHTML = '';
+      content.innerHTML = '';
+      if(!state.planTabs || !state.planTabs.length){
+        content.innerHTML = '<div class="muted">No imported plan tabs yet. Use "Import Plan into Week Tabs" or choose a Markdown file.</div>';
+        return;
+      }
+      state.planTabs.forEach((tab, idx)=>{
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tab-button' + (idx === state.activePlanTab ? ' active' : '');
+        btn.textContent = tab.name;
+        btn.addEventListener('click', ()=>{ state.activePlanTab = idx; saveState(); renderPlanTabs(); });
+        tabs.appendChild(btn);
+      });
+      const active = state.planTabs[state.activePlanTab] || state.planTabs[0];
+      if(!active){ return; }
+      content.innerHTML = `<h3 style="margin:0 0 10px 0">${escapeHtml(active.name)}</h3><ul class="checklist"></ul>`;
+      const ul = content.querySelector('ul');
+      active.items = active.items.map(it => typeof it === 'string' ? {text: it, done:false} : it);
+      active.items.forEach((item, idx)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<label><input data-tab="${state.activePlanTab}" data-idx="${idx}" type="checkbox" ${item.done ? 'checked' : ''}/> ${escapeHtml(item.text)}</label>`;
+        ul.appendChild(li);
+      });
+      content.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
+        const tabIndex = +e.target.dataset.tab;
+        const itemIndex = +e.target.dataset.idx;
+        state.planTabs[tabIndex].items[itemIndex].done = e.target.checked;
+        saveState(); renderPlanTabs();
+      }));
+    }
+
+    // helpers
+    function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function saveState(){ localStorage.setItem(stateKey, JSON.stringify(state)); updateSavedList(); }
+    function loadState(){ const raw = localStorage.getItem(stateKey); if(raw){ state = Object.assign({ checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0 }, JSON.parse(raw)); } renderAll(); }
+    function renderAll(){ renderChecklist(); renderLists(); renderNotes(); renderPlanTabs(); }
+
+    // UI bindings
+    document.getElementById('addChecklist').addEventListener('click', ()=>{
+      const t = document.getElementById('newChecklistItem').value.trim(); if(!t) return; state.checklist.push({text:t,done:false}); document.getElementById('newChecklistItem').value=''; saveState(); renderChecklist();
+    });
+
+    document.getElementById('createList').addEventListener('click', ()=>{
+      const name = document.getElementById('listName').value.trim(); const items = document.getElementById('listItems').value.split('\n').map(s=>s.trim()).filter(Boolean); if(!name || !items.length) return alert('Provide name and at least one item'); state.lists.push({name,items}); document.getElementById('listName').value=''; document.getElementById('listItems').value=''; saveState(); renderLists();
+    });
+
+    document.getElementById('clearLists').addEventListener('click', ()=>{ if(confirm('Clear all lists?')){ state.lists=[]; saveState(); renderLists(); }});
+
+    document.getElementById('saveBtn').addEventListener('click', ()=>{ saveState(); alert('Saved to browser storage.'); });
+    document.getElementById('loadBtn').addEventListener('click', ()=>{ loadState(); alert('Loaded state from browser storage.'); });
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(!confirm('Reset the page and clear saved onboarding state?')) return;
+      localStorage.removeItem(stateKey);
+      state = { checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0 };
+      renderAll(); updateSavedList();
+      alert('Page reset. You can start over now.');
+    });
+
+    document.getElementById('saveNote').addEventListener('click', ()=>{
+      const t = document.getElementById('noteTitle').value.trim(); const b = document.getElementById('noteBody').value.trim(); if(!t && !b) return alert('Enter a title or note body'); state.notes.unshift({title:t||'(no title)',body:b,t:Date.now()}); document.getElementById('noteTitle').value=''; document.getElementById('noteBody').value=''; saveState(); renderNotes();
+    });
+
+    document.getElementById('exportNote').addEventListener('click', ()=>{
+      const t = document.getElementById('noteTitle').value.trim()||'note'; const b = document.getElementById('noteBody').value.trim(); if(!b) return alert('No note to export'); downloadFile(`${t.replace(/[^a-z0-9-_]/gi,'_')}.md`, `# ${t}\n\n${b}`);
+    });
+
+    document.getElementById('exportJsonBtn').addEventListener('click', ()=>{ downloadFile('onboarding_state.json', JSON.stringify(state, null, 2)); });
+
+    document.getElementById('exportMdBtn').addEventListener('click', ()=>{ downloadFile('onboarding_notes.md', buildMarkdown()); });
+
+    document.getElementById('viewMd').addEventListener('click', async ()=>{
+      const pre = document.getElementById('mdPreview'); pre.style.display='block';
+      try{
+        const r = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
+        if(!r.ok) throw new Error('Could not fetch');
+        const txt = await r.text(); pre.textContent = txt;
+      }catch(e){ pre.textContent = 'Unable to load plan file. Ensure the MD file is in the same folder.' }
+    });
+
+    document.getElementById('importPlan').addEventListener('click', async ()=>{
+      if(!confirm('Import the 90-day plan into interactive week tabs?')) return;
+      try{
+        const r = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
+        if(!r.ok) throw new Error('Could not fetch plan file');
+        const txt = await r.text();
+        importPlanMarkdown(txt);
+        saveState(); renderPlanTabs();
+        alert('Plan imported as week tabs. You can mark items as done in the tab view.');
+      }catch(e){ alert('Import failed: '+ e.message); }
+    });
+
+    // Import via local file picker (no server required)
+    document.getElementById('chooseFileBtn').addEventListener('click', ()=>{
+      document.getElementById('importFile').click();
+    });
+    document.getElementById('importFile').addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = function(evt){
+        try{
+          importPlanMarkdown(String(evt.target.result || ''));
+          saveState(); renderPlanTabs();
+          alert('Plan imported from file.');
+        }catch(err){ alert('Import failed: '+err.message); }
+      };
+      reader.readAsText(f);
+      // clear selection
+      e.target.value = '';
+    });
+
+    function importPlanMarkdown(md){
+      const lines = md.split(/\r?\n/);
+      let current = null;
+      const newTabs = [];
+      for(const raw of lines){
+        const line = raw.trim();
+        if(!line) continue;
+        const h = line.match(/^(#{2,3})\s+(.*)$/);
+        if(h){
+          const title = h[2].trim();
+          if(/week/i.test(title)){
+            current = {name: title, items: []};
+            newTabs.push(current);
+          }
+          continue;
+        }
+        const c = line.match(/^[-*]\s+\[( |x|X)\]\s+(.*)$/);
+        if(c && current){ current.items.push({text: c[2].trim(), done: c[1].toLowerCase() === 'x'}); continue; }
+        const b = line.match(/^[-*]\s+(.*)$/);
+        if(b && current){ current.items.push({text: b[1].trim(), done:false}); continue; }
+        // include plain section headings as notes inside the current week
+        const inlineHeader = line.match(/^([A-Za-z ]+):$/);
+        if(inlineHeader && current){ current.items.push({text: `${inlineHeader[1].trim()}:`, done:false}); }
+      }
+      state.planTabs = newTabs.filter(tab => tab.items && tab.items.length);
+      state.activePlanTab = 0;
+    }
+
+    function buildMarkdown(){
+      let md = '# Onboarding Notes and Checklists\n\n';
+      md += '## Checklist\n';
+      state.checklist.forEach(i=> md += `- [${i.done ? 'x' : ' '}] ${i.text}\n`);
+      md += '\n## Lists\n';
+      state.lists.forEach(l=>{ md += `### ${l.name}\n`; l.items.forEach(it=> md += `- ${it}\n`); md += '\n'; });
+      md += '\n## Notes\n';
+      state.notes.forEach(n=> md += `### ${n.title} — ${new Date(n.t).toLocaleString()}\n${n.body}\n\n`);
+      return md;
+    }
+
+    function downloadFile(name, content){ const blob = new Blob([content], {type:'text/plain;charset=utf-8'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+    function updateSavedList(){ const s = localStorage.getItem(stateKey); const el = document.getElementById('savedList'); el.textContent = s ? 'Saved in browser' : 'No saved states'; }
+
+    // init
+    loadState(); updateSavedList();
+
+    // Attempt auto-import of the plan when page loads if no lists exist.
+    // Try fetching the MD first; if fetch fails (common when opened via file://),
+    // open the file chooser so the user can pick the local file.
+    (async function tryAutoImport(){
+      try{
+        if(state.planTabs && state.planTabs.length) return; // don't auto-import if plan tabs already exist
+        const r = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
+        if(r.ok){ const txt = await r.text(); importPlanMarkdown(txt); saveState(); renderPlanTabs(); console.log('Plan auto-imported from same folder'); return; }
+      }catch(e){ /* fetch likely blocked for file:// */ }
+      // fallback: open file picker (may be blocked by some browsers without user gesture)
+      try{ document.getElementById('chooseFileBtn').click(); }catch(e){ /* ignore */ }
+    })();
+  </script>
+</body>
+</html>
