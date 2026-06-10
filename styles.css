@@ -19,6 +19,32 @@ html, body {
   color: var(--text);
 }
 
+.auth-gate {
+  margin: 24px 28px;
+  padding: 40px 32px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.auth-gate-content {
+  max-width: 640px;
+}
+
+.auth-gate h2 {
+  margin: 0 0 12px;
+  font-size: 1.8rem;
+}
+
+.auth-gate p {
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+
 button, input, textarea {
   font: inherit;
 }

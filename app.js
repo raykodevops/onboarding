@@ -9,13 +9,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   attachHandlers();
   loadLocalPlan();
   await refreshAuth();
-  await tryAutoLoadPlan();
+  if (state.user) {
+    await tryAutoLoadPlan();
+  }
   render();
 });
 
 function attachHandlers() {
   document.getElementById('loginBtn').addEventListener('click', login);
   document.getElementById('logoutBtn').addEventListener('click', logout);
+  document.getElementById('loginGateBtn').addEventListener('click', login);
   document.getElementById('fetchPlanBtn').addEventListener('click', fetchPlanFromSite);
   document.getElementById('choosePlanFileBtn').addEventListener('click', () => document.getElementById('planFile').click());
   document.getElementById('planFile').addEventListener('change', handlePlanFile);
@@ -31,9 +34,7 @@ async function refreshAuth() {
     if (!res.ok) {
       state.user = null;
       status.textContent = 'Not signed in';
-      if (!window.location.pathname.startsWith('/.auth')) {
-        window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
-      }
+      showLoginGate();
       return;
     }
     const data = await res.json();
@@ -43,21 +44,18 @@ async function refreshAuth() {
     } else {
       state.user = null;
       status.textContent = 'Not signed in';
-      if (!window.location.pathname.startsWith('/.auth')) {
-        window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
-      }
+      showLoginGate();
       return;
     }
   } catch (err) {
     state.user = null;
     status.textContent = 'Not signed in';
-    if (!window.location.pathname.startsWith('/.auth')) {
-      window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
-    }
+    showLoginGate();
     return;
   }
   document.getElementById('loginBtn').classList.toggle('hidden', !!state.user);
   document.getElementById('logoutBtn').classList.toggle('hidden', !state.user);
+  showLoginGate();
 }
 
 function login() {
@@ -66,6 +64,13 @@ function login() {
 
 function logout() {
   window.location.href = '/.auth/logout?post_logout_redirect_url=/';
+}
+
+function showLoginGate() {
+  const gate = document.getElementById('authGate');
+  const main = document.querySelector('main.page-body');
+  gate.classList.toggle('hidden', !!state.user);
+  if (main) main.classList.toggle('hidden', !state.user);
 }
 
 async function tryAutoLoadPlan() {
