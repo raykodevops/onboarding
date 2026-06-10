@@ -69,8 +69,10 @@ function logout() {
 function showLoginGate() {
   const gate = document.getElementById('authGate');
   const main = document.querySelector('main.page-body');
+  const footer = document.querySelector('footer.page-footer');
   gate.classList.toggle('hidden', !!state.user);
   if (main) main.classList.toggle('hidden', !state.user);
+  if (footer) footer.classList.toggle('hidden', !state.user);
 }
 
 async function tryAutoLoadPlan() {
