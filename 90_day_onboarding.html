@@ -15,34 +15,80 @@
       --input-bg:#0b1624;
       --input-border:#16222f;
       --text:#e6eef8;
+      /* ND-friendly overrides (controlled by body classes) */
+      --font-scale:1;
+      --density:1;
     }
-    body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}
-    header{padding:18px 24px;background:linear-gradient(90deg,var(--panel),#0a4bd6);color:var(--text)}
-    .wrap{display:flex;height:calc(100vh - 64px)}
-    nav{width:300px;background:var(--panel-2);border-right:1px solid rgba(255,255,255,0.04);overflow:auto;padding:16px}
-    main{flex:1;padding:18px;overflow:auto}
-    h1,h2{margin:8px 0}
-    .card{background:var(--panel);padding:12px;border-radius:8px;box-shadow:var(--card-shadow);margin-bottom:12px}
-    label{display:block;margin:6px 0;color:var(--text)}
-    input[type=text],textarea{width:100%;padding:8px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);color:var(--text)}
-    input[type=text]::placeholder, textarea::placeholder{color:rgba(230,238,248,0.45)}
-    button{background:var(--accent);color:#021026;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text);font-size:calc(15px * var(--font-scale))}
+    body.calm { --accent:#4a9de3; --panel:#101a2a; }
+    body.high-contrast { --muted:#c8d4e6; --text:#f0f6ff; --accent:#5db0ff; --panel:#0c1420; }
+    body.compact { --density:0.82; }
+    body{font-size:calc(15px * var(--font-scale) * var(--density,1))}
+
+    header{padding:14px 20px;background:linear-gradient(90deg,var(--panel),#0a4bd6);color:var(--text)}
+    .wrap{display:flex;height:calc(100vh - 58px)}
+    nav{width:280px;background:var(--panel-2);border-right:1px solid rgba(255,255,255,0.04);overflow:auto;padding:12px}
+    main{flex:1;padding:14px 18px;overflow:auto}
+
+    h1,h2,h3{margin:6px 0 4px}
+    .card{background:var(--panel);padding:14px;border-radius:10px;box-shadow:var(--card-shadow);margin-bottom:14px}
+    .card.dense{padding:10px}
+    label{display:block;margin:4px 0;color:var(--text);font-size:0.95em}
+
+    input[type=text],textarea{width:100%;padding:9px 11px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font:inherit}
+    input[type=text]::placeholder, textarea::placeholder{color:rgba(230,238,248,0.5)}
+    button{background:var(--accent);color:#021026;border:none;padding:9px 14px;border-radius:8px;cursor:pointer;font:inherit;font-weight:500}
+    button.small{padding:5px 10px;font-size:0.9em}
     a{color:var(--accent)}
-    .sm{padding:6px 10px;background:var(--accent);color:#021026;border-radius:6px}
-    ul.checklist{list-style:none;padding-left:0}
-    ul.checklist li{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.03);color:var(--text)}
-    .flex{display:flex;gap:8px}
-    .tab-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-    .tab-button{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);cursor:pointer;transition:background 0.2s}
-    .tab-button.active{background:var(--accent);color:#021026;border-color:rgba(58,160,255,0.7)}
-    .tab-panel{margin-top:12px}
-    .section-link{display:block;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none}
+
+    ul.checklist{list-style:none;padding-left:0;margin:0}
+    ul.checklist li{padding:5px 0 5px 2px;border-bottom:1px dashed rgba(255,255,255,0.04);color:var(--text);line-height:1.35}
+    ul.checklist li:last-child{border-bottom:none}
+    ul.checklist input[type=checkbox]{transform:scale(1.15);margin-right:6px;vertical-align:middle}
+    .checklist label{display:inline-flex;align-items:flex-start;gap:6px;cursor:pointer}
+    .checklist .done{opacity:0.65;text-decoration:line-through}
+
+    .flex{display:flex;gap:8px;align-items:center}
+    .tab-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .tab-button{padding:7px 13px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--text);cursor:pointer;font-size:0.92em}
+    .tab-button.active{background:var(--accent);color:#021026;border-color:rgba(58,160,255,0.7);font-weight:600}
+    .tab-panel{margin-top:10px}
+
+    .section-link{display:block;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none;font-size:0.95em}
     .section-link:hover{background:rgba(255,255,255,0.02)}
-    .top-actions{display:flex;gap:8px}
+    .top-actions{display:flex;gap:6px;flex-wrap:wrap}
     .muted{color:var(--muted)}
-    footer{font-size:13px;padding:12px;color:var(--muted)}
-    pre{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));padding:8px;border-radius:6px}
-    a[download]{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none}
+    footer{font-size:12px;padding:10px 16px;color:var(--muted);background:rgba(0,0,0,0.15)}
+
+    pre{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));padding:10px;border-radius:8px;font-size:0.9em}
+    a[download]{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:6px 10px;border-radius:6px;text-decoration:none;font-size:0.9em}
+
+    /* Neurodivergence-friendly additions */
+    .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
+    .dash-card{background:var(--panel-2);padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
+    .dash-card .label{font-size:0.78em;letter-spacing:0.3px;color:var(--muted);margin-bottom:2px}
+    .dash-card .big{font-size:1.35em;font-weight:700;line-height:1.1}
+    .progress-bar{height:6px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;margin-top:6px}
+    .progress-bar > div{height:100%;background:var(--accent);transition:width .25s ease}
+
+    .focus-today{background:#0c1a2e;border:2px solid #3aa0ff33;padding:12px 14px;border-radius:12px;margin-bottom:14px}
+    .focus-today h3{margin:0 0 6px;font-size:1em;color:#9cc8ff}
+    .focus-item{display:flex;align-items:center;gap:8px;padding:4px 0}
+    .focus-item .remove{color:#ff8a8a;font-size:0.85em;cursor:pointer;background:none;border:none;padding:1px 5px}
+
+    .nd-controls{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 10px}
+    .nd-controls button{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.1);padding:4px 9px;font-size:0.82em;border-radius:999px}
+    .nd-controls button.active{background:var(--accent);color:#021026;border-color:var(--accent)}
+
+    .phase-pill{display:inline-block;font-size:0.75em;padding:1px 8px;border-radius:999px;background:rgba(58,160,255,0.15);color:#9cc8ff;margin-left:6px}
+
+    .plan-meta{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;margin:8px 0;font-size:0.92em}
+    .plan-meta strong{color:#a8c8f0}
+
+    .search-row{margin:8px 0 4px;display:flex;gap:8px}
+    .search-row input{flex:1}
+
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
@@ -50,7 +96,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
         <h1 style="font-size:18px;margin:0">90-Day Onboarding — Interactive Runbook</h1>
-        <div class="muted">Fill checklists, take notes, export progress</div>
+        <div class="muted">Built for focus &amp; clarity • Checklists, pinning, progress at a glance, and sensory controls</div>
       </div>
       <div class="top-actions">
         <button id="saveBtn">Save</button>
@@ -64,23 +110,79 @@
   <div class="wrap">
     <nav>
       <div class="card">
-        <h2 style="font-size:16px;margin:0 0 8px 0">Quick Actions</h2>
-        <a class="section-link" href="#checklist">Checklist</a>
+        <h2 style="font-size:15px;margin:0 0 6px 0">Quick Actions</h2>
+        <a class="section-link" href="#checklist">Quick Checklist</a>
         <a class="section-link" href="#lists">Create a List</a>
         <a class="section-link" href="#notes">Notes</a>
         <a class="section-link" href="#plan">Open Plan (MD)</a>
+        <a class="section-link" href="#importedPlan">Imported Week Tabs</a>
       </div>
+
+      <!-- Global search helps when lists get long (ADHD context switching) -->
+      <div class="card" style="padding:10px 12px">
+        <label style="margin-bottom:4px;font-size:0.82em">Search all lists</label>
+        <input id="globalSearch" type="text" placeholder="Filter visible items..." style="padding:6px 9px;font-size:0.9em" />
+        <div id="searchResults" style="font-size:0.75em;margin-top:4px;color:var(--muted)"></div>
+      </div>
+
       <div class="card">
-        <h3 style="margin:0 0 6px 0">Saved States</h3>
-        <div id="savedList">No saved states</div>
+        <h3 style="margin:0 0 4px 0;font-size:0.95em">Saved in browser</h3>
+        <div id="savedList" style="font-size:0.82em">No saved states</div>
       </div>
     </nav>
     <main>
+      <!-- Neurodivergence-friendly: Visible orientation + low cognitive load -->
+      <div id="dashboard" class="dashboard" aria-label="Progress overview">
+        <div class="dash-card">
+          <div class="label">OVERALL PROGRESS</div>
+          <div class="big"><span id="overallPct">0</span>%</div>
+          <div class="progress-bar"><div id="overallBar" style="width:0%"></div></div>
+        </div>
+        <div class="dash-card">
+          <div class="label">CURRENT PHASE</div>
+          <div class="big" id="currentPhase">Phase 1 — Orientation</div>
+          <div style="margin-top:4px;font-size:0.8em;color:var(--muted)">Week <span id="currentWeek">1</span> of 12</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">ITEMS DONE / TOTAL</div>
+          <div class="big"><span id="itemsDone">0</span> / <span id="itemsTotal">0</span></div>
+          <div id="phaseBreakdown" style="margin-top:4px;font-size:0.78em;line-height:1.3;color:var(--muted)"></div>
+        </div>
+        <div class="dash-card">
+          <div class="label">QUICK WINS TODAY</div>
+          <div style="font-size:0.9em;color:#a8d0ff" id="quickWinsHint">Pin 1–3 items in "Focus Today" below</div>
+        </div>
+      </div>
+
+      <!-- Executive function support: "Focus Today" is always near the top -->
+      <div id="focusToday" class="focus-today">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <h3 style="margin:0">🎯 Focus Today <span style="font-size:0.8em;font-weight:400;color:#7fa8d8">(1–3 items max — reduces decision fatigue)</span></h3>
+          <button id="clearFocusBtn" class="small" style="background:rgba(255,255,255,0.08);color:#ddd">Clear all</button>
+        </div>
+        <div id="focusList"></div>
+        <div style="margin-top:6px;font-size:0.78em;color:#7fa8d8">Tip: Click "Pin" next to any checklist item to add it here.</div>
+      </div>
+
+      <!-- Sensory preferences — low effort, high control -->
+      <div class="nd-controls" aria-label="Comfort and display settings">
+        <span style="font-size:0.8em;color:var(--muted);margin-right:4px">Comfort:</span>
+        <button id="fsMinus" title="Smaller text">A−</button>
+        <button id="fsReset" title="Reset text size">A</button>
+        <button id="fsPlus" title="Larger text">A+</button>
+        <button id="densityBtn" title="Toggle comfortable vs compact spacing">Density</button>
+        <button id="hideDoneBtn" title="Hide completed items">Hide done</button>
+        <button id="calmBtn" title="Lower saturation palette">Calm</button>
+        <button id="hcBtn" title="Higher contrast">Hi-Contrast</button>
+        <button id="focusModeBtn" title="Distraction-free view (hides sidebar + extra panels)">Focus mode</button>
+        <button id="searchFocusBtn" title="Jump to search">🔎 Search</button>
+      </div>
+
       <section id="checklist" class="card">
-        <h2>Checklist</h2>
-        <p class="muted">Create quick checklist items and mark them done.</p>
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <input id="newChecklistItem" type="text" placeholder="Add new checklist item" />
+        <h2>Quick Checklist</h2>
+        <p class="muted" style="margin-bottom:6px">Fast scratch space for anything. These are saved automatically.</p>
+        <div class="search-row">
+          <input id="newChecklistItem" type="text" placeholder="Add new checklist item (press Enter)" />
           <button id="addChecklist">Add</button>
         </div>
         <ul id="checklistUl" class="checklist"></ul>
@@ -130,10 +232,14 @@
       </section>
 
       <section id="importedPlan" class="card">
-        <h2>Imported Plan Tabs</h2>
-        <p class="muted">Each imported week or section appears here as its own tab.</p>
+        <h2>90-Day Plan — Week Tabs <span class="phase-pill">Interactive</span></h2>
+        <p class="muted" style="margin:2px 0 6px">The plan is parsed into checkable weeks. Weekly goals and key meetings are highlighted when available. Mark items done — your progress updates the dashboard above automatically.</p>
+        <div class="search-row">
+          <input id="planSearch" type="text" placeholder="Filter current week items..." style="font-size:0.9em;padding:7px" />
+        </div>
         <div id="planTabs" class="tab-bar"></div>
         <div id="planTabContent" class="tab-panel"></div>
+        <div style="margin-top:8px;font-size:0.78em;color:#7fa8d8">Tip: Use the "Focus Today" panel at the top to pin the 1–3 things you actually want to work on today.</div>
       </section>
 
     </main>
@@ -143,39 +249,208 @@
   </footer>
 
   <script>
-    // Basic state
+    // Basic state — extended for neurodivergent supports (focus pins, prefs)
     const stateKey = 'onboard_runbook_v1';
-    let state = { checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0 };
+    let state = {
+      checklist: [],
+      lists: [],
+      notes: [],
+      planTabs: [],
+      activePlanTab: 0,
+      focusItems: [],           // pinned "Focus Today" items
+      prefs: { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false }
+    };
 
-    function renderChecklist(){
-      const ul = document.getElementById('checklistUl');
-      ul.innerHTML = '';
-      state.checklist.forEach((item, idx)=>{
-        const li = document.createElement('li');
-        li.innerHTML = `<label><input data-idx="${idx}" type="checkbox" ${item.done ? 'checked' : ''}/> <strong>${escapeHtml(item.text)}</strong></label>`;
-        ul.appendChild(li);
-      });
-      document.querySelectorAll('#checklistUl input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
-        const idx = +e.target.dataset.idx; state.checklist[idx].done = e.target.checked; saveState(); renderChecklist();
-      }));
+    let focusMode = false;
+
+    function applyPrefs() {
+      const b = document.body;
+      b.style.setProperty('--font-scale', state.prefs.fontScale || 1);
+      b.classList.toggle('compact', !!state.prefs.compact);
+      b.classList.toggle('calm', !!state.prefs.calm);
+      b.classList.toggle('high-contrast', !!state.prefs.highContrast);
+      // hideDone is applied at render time
+      updateNdButtons();
     }
 
-    function renderLists(){
+    function updateNdButtons() {
+      const map = {
+        densityBtn: state.prefs.compact,
+        hideDoneBtn: state.prefs.hideDone,
+        calmBtn: state.prefs.calm,
+        hcBtn: state.prefs.highContrast
+      };
+      Object.entries(map).forEach(([id, active]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', !!active);
+      });
+    }
+
+    function updateDashboard() {
+      // Aggregate progress from quick checklist + all lists + plan tabs
+      let done = 0, total = 0;
+      state.checklist.forEach(i => { total++; if (i.done) done++; });
+      state.lists.forEach(l => (l.items || []).forEach(it => { total++; if (it.done) done++; }));
+      state.planTabs.forEach(t => (t.items || []).forEach(it => { total++; if (it.done) done++; }));
+
+      const pct = total > 0 ? Math.round(done / total * 100) : 0;
+      const overallPctEl = document.getElementById('overallPct');
+      const overallBarEl = document.getElementById('overallBar');
+      if (overallPctEl) overallPctEl.textContent = pct;
+      if (overallBarEl) overallBarEl.style.width = pct + '%';
+
+      document.getElementById('itemsDone').textContent = done;
+      document.getElementById('itemsTotal').textContent = total;
+
+      // Heuristic phase detection based on plan tabs or items done
+      let phase = 'Phase 1 — Orientation & Foundation';
+      let weekNum = 1;
+      if (state.planTabs && state.planTabs.length) {
+        const activeName = (state.planTabs[state.activePlanTab] || {}).name || '';
+        const match = activeName.match(/week\s*(\d+)/i);
+        if (match) weekNum = parseInt(match[1], 10);
+        if (weekNum >= 9) phase = 'Phase 3 — Contributing & Ownership';
+        else if (weekNum >= 5) phase = 'Phase 2 — Learning & Building';
+      } else if (done > 18) {
+        phase = 'Phase 2 — Learning & Building';
+        weekNum = Math.min(8, Math.max(5, Math.ceil(done / 4)));
+      } else if (done > 8) {
+        phase = 'Phase 1 — Orientation & Foundation';
+        weekNum = Math.min(4, Math.max(2, Math.ceil(done / 3)));
+      }
+      const cp = document.getElementById('currentPhase');
+      const cw = document.getElementById('currentWeek');
+      if (cp) cp.textContent = phase;
+      if (cw) cw.textContent = weekNum;
+
+      // Simple phase breakdown hint
+      const bd = document.getElementById('phaseBreakdown');
+      if (bd) {
+        const p1 = Math.min(30, Math.max(0, done));
+        bd.innerHTML = `Rough guide: Phase 1 (Days 1-30) &nbsp;•&nbsp; Phase 2 (31-60) &nbsp;•&nbsp; Phase 3 (61-90)`;
+      }
+    }
+
+    function renderFocus() {
+      const c = document.getElementById('focusList');
+      if (!c) return;
+      c.innerHTML = '';
+      if (!state.focusItems || !state.focusItems.length) {
+        c.innerHTML = '<div style="color:#7fa8d8;font-size:0.9em">Nothing pinned yet. Use the Pin buttons on any checklist.</div>';
+        return;
+      }
+      state.focusItems.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'focus-item';
+        row.innerHTML = `
+          <input type="checkbox" ${item.done ? 'checked' : ''} data-idx="${idx}">
+          <span style="flex:1${item.done ? ';opacity:0.6;text-decoration:line-through' : ''}">${escapeHtml(item.text)}</span>
+          <button class="remove small" data-idx="${idx}">remove</button>
+        `;
+        c.appendChild(row);
+      });
+
+      c.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.addEventListener('change', e => {
+          const i = +e.target.dataset.idx;
+          state.focusItems[i].done = e.target.checked;
+          saveState();
+          renderFocus();
+          renderAll(); // keep main lists in sync if possible
+          updateDashboard();
+        });
+      });
+      c.querySelectorAll('.remove').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const i = +e.target.dataset.idx;
+          state.focusItems.splice(i, 1);
+          saveState();
+          renderFocus();
+          updateDashboard();
+        });
+      });
+    }
+
+    function addToFocus(text, source = 'quick') {
+      if (!state.focusItems) state.focusItems = [];
+      if (state.focusItems.length >= 3) {
+        alert('Focus Today supports a maximum of 3 items. This helps prevent overwhelm.');
+        return;
+      }
+      // avoid exact duplicates
+      if (state.focusItems.some(f => f.text === text)) return;
+      state.focusItems.push({ text, done: false, source });
+      saveState();
+      renderFocus();
+      updateDashboard();
+    }
+
+    function renderChecklist(filter = ''){
+      const ul = document.getElementById('checklistUl');
+      ul.innerHTML = '';
+      const hideDone = state.prefs && state.prefs.hideDone;
+      state.checklist.forEach((item, idx)=>{
+        if (hideDone && item.done) return;
+        const text = item.text || '';
+        if (filter && !text.toLowerCase().includes(filter.toLowerCase())) return;
+
+        const li = document.createElement('li');
+        const doneClass = item.done ? ' done' : '';
+        li.innerHTML = `
+          <label class="${doneClass}">
+            <input data-idx="${idx}" type="checkbox" ${item.done ? 'checked' : ''}/>
+            <span>${escapeHtml(text)}</span>
+          </label>
+          <button class="small" data-pin-idx="${idx}" style="background:rgba(58,160,255,0.12);color:#9cc8ff;border:none;padding:2px 7px;margin-left:6px;font-size:0.75em">Pin</button>
+        `;
+        ul.appendChild(li);
+      });
+
+      // checkbox handlers
+      document.querySelectorAll('#checklistUl input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
+        const idx = +e.target.dataset.idx; state.checklist[idx].done = e.target.checked; saveState(); renderChecklist(filter); updateDashboard(); renderFocus();
+      }));
+      // pin handlers
+      document.querySelectorAll('#checklistUl [data-pin-idx]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const idx = +e.target.dataset.pinIdx;
+          const txt = state.checklist[idx] && state.checklist[idx].text;
+          if (txt) addToFocus(txt, 'quick');
+        });
+      });
+    }
+
+    function renderLists(filter = ''){
       const c = document.getElementById('listsContainer'); c.innerHTML='';
+      const hideDone = state.prefs && state.prefs.hideDone;
       state.lists.forEach((l, i)=>{
-        const div = document.createElement('div'); div.className='card';
+        const div = document.createElement('div'); div.className='card dense';
         div.style.marginBottom='8px';
         // normalize items to objects {text,done}
         l.items = l.items.map(it => typeof it === 'string' ? {text: it, done:false} : it);
-        const itemsHtml = l.items.map((it,idx)=>`<li><label><input data-list="${i}" data-idx="${idx}" type="checkbox" ${it.done? 'checked' : ''}/> ${escapeHtml(it.text)}</label></li>`).join('');
-        div.innerHTML = `<h3 style="margin:0 0 6px 0">${escapeHtml(l.name)}</h3><ul>${itemsHtml}</ul><div style="margin-top:6px"><button data-i="${i}" class="delList">Delete</button></div>`;
+        let itemsHtml = '';
+        l.items.forEach((it,idx)=>{
+          if (hideDone && it.done) return;
+          const t = it.text || '';
+          if (filter && !t.toLowerCase().includes(filter.toLowerCase())) return;
+          const doneCls = it.done ? ' done' : '';
+          itemsHtml += `<li class="${doneCls}"><label><input data-list="${i}" data-idx="${idx}" type="checkbox" ${it.done? 'checked' : ''}/> ${escapeHtml(t)}</label><button class="small" data-pin-list="${i}" data-pin-idx="${idx}" style="background:rgba(58,160,255,0.12);color:#9cc8ff;border:none;padding:1px 6px;margin-left:6px;font-size:0.72em">Pin</button></li>`;
+        });
+        div.innerHTML = `<h3 style="margin:0 0 4px 0;font-size:0.98em">${escapeHtml(l.name)}</h3><ul class="checklist">${itemsHtml}</ul><div style="margin-top:6px"><button data-i="${i}" class="delList small">Delete list</button></div>`;
         c.appendChild(div);
       });
       // attach handlers
-      document.querySelectorAll('.delList').forEach(b=>b.addEventListener('click',e=>{state.lists.splice(+e.target.dataset.i,1); saveState(); renderLists();}));
+      document.querySelectorAll('.delList').forEach(b=>b.addEventListener('click',e=>{state.lists.splice(+e.target.dataset.i,1); saveState(); renderLists(filter); updateDashboard();}));
       document.querySelectorAll('#listsContainer input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
-        const li = +e.target.dataset.list; const idx = +e.target.dataset.idx; state.lists[li].items[idx].done = e.target.checked; saveState(); renderLists();
+        const li = +e.target.dataset.list; const idx = +e.target.dataset.idx; state.lists[li].items[idx].done = e.target.checked; saveState(); renderLists(filter); updateDashboard(); renderFocus();
       }));
+      document.querySelectorAll('#listsContainer [data-pin-list]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const li = +e.target.dataset.pinList; const idx = +e.target.dataset.pinIdx;
+          const txt = state.lists[li] && state.lists[li].items && state.lists[li].items[idx] && state.lists[li].items[idx].text;
+          if (txt) addToFocus(txt, 'list');
+        });
+      });
     }
 
     function renderNotes(){
@@ -187,13 +462,13 @@
       document.querySelectorAll('.delNote').forEach(b=>b.addEventListener('click',e=>{state.notes.splice(+e.target.dataset.i,1); saveState(); renderNotes();}));
     }
 
-    function renderPlanTabs(){
+    function renderPlanTabs(filter = ''){
       const tabs = document.getElementById('planTabs');
       const content = document.getElementById('planTabContent');
       tabs.innerHTML = '';
       content.innerHTML = '';
       if(!state.planTabs || !state.planTabs.length){
-        content.innerHTML = '<div class="muted">No imported plan tabs yet. Use "Import Plan into Week Tabs" or choose a Markdown file.</div>';
+        content.innerHTML = '<div class="muted">No imported plan tabs yet. Use "Import Plan into Week Tabs" or choose a Markdown file. The rich structure (Weekly Goals + meetings) will be highlighted.</div>';
         return;
       }
       state.planTabs.forEach((tab, idx)=>{
@@ -201,50 +476,125 @@
         btn.type = 'button';
         btn.className = 'tab-button' + (idx === state.activePlanTab ? ' active' : '');
         btn.textContent = tab.name;
-        btn.addEventListener('click', ()=>{ state.activePlanTab = idx; saveState(); renderPlanTabs(); });
+        btn.addEventListener('click', ()=>{ state.activePlanTab = idx; saveState(); renderPlanTabs(filter); });
         tabs.appendChild(btn);
       });
       const active = state.planTabs[state.activePlanTab] || state.planTabs[0];
       if(!active){ return; }
-      content.innerHTML = `<h3 style="margin:0 0 10px 0">${escapeHtml(active.name)}</h3><ul class="checklist"></ul>`;
-      const ul = content.querySelector('ul');
+
+      let html = `<h3 style="margin:0 0 6px 0">${escapeHtml(active.name)}</h3>`;
+
+      // Show Weekly Goal prominently when present (ND-friendly explicit goal)
+      if (active.goal) {
+        html += `<div class="plan-meta"><strong>🎯 Weekly Goal:</strong> ${escapeHtml(active.goal)}</div>`;
+      }
+
+      // Meetings to Schedule get their own section (actionable, high value)
+      if (active.meetings && active.meetings.length) {
+        html += `<div style="margin:8px 0 4px;font-size:0.9em;color:#9cc8ff"><strong>Meetings to schedule</strong></div>`;
+        html += `<ul class="checklist" id="meetingsList">`;
+        active.meetings.forEach((m, mIdx) => {
+          const done = m.done ? 'checked' : '';
+          const cls = m.done ? 'done' : '';
+          html += `<li class="${cls}"><label><input type="checkbox" data-meeting="${mIdx}" ${done}/> ${escapeHtml(m.text)}</label></li>`;
+        });
+        html += `</ul>`;
+      }
+
+      html += `<ul class="checklist" id="planItemsList"></ul>`;
+      content.innerHTML = html;
+
+      const ul = document.getElementById('planItemsList');
       active.items = active.items.map(it => typeof it === 'string' ? {text: it, done:false} : it);
+
       active.items.forEach((item, idx)=>{
+        if (filter && !item.text.toLowerCase().includes(filter.toLowerCase())) return;
+        const hideDone = state.prefs && state.prefs.hideDone;
+        if (hideDone && item.done) return;
+
         const li = document.createElement('li');
-        li.innerHTML = `<label><input data-tab="${state.activePlanTab}" data-idx="${idx}" type="checkbox" ${item.done ? 'checked' : ''}/> ${escapeHtml(item.text)}</label>`;
+        const doneCls = item.done ? 'done' : '';
+        li.innerHTML = `
+          <label class="${doneCls}">
+            <input data-tab="${state.activePlanTab}" data-idx="${idx}" type="checkbox" ${item.done ? 'checked' : ''}/>
+            ${escapeHtml(item.text)}
+          </label>
+          <button class="small" data-pin-tab="${state.activePlanTab}" data-pin-idx="${idx}" style="background:rgba(58,160,255,0.12);color:#9cc8ff;border:none;padding:1px 6px;margin-left:6px;font-size:0.72em">Pin</button>
+        `;
         ul.appendChild(li);
       });
-      content.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
+
+      // Plan item checkboxes
+      content.querySelectorAll('#planItemsList input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
         const tabIndex = +e.target.dataset.tab;
         const itemIndex = +e.target.dataset.idx;
         state.planTabs[tabIndex].items[itemIndex].done = e.target.checked;
-        saveState(); renderPlanTabs();
+        saveState(); renderPlanTabs(filter); updateDashboard(); renderFocus();
       }));
+      // Pin from plan
+      content.querySelectorAll('[data-pin-tab]').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const t = +e.target.dataset.pinTab; const i = +e.target.dataset.pinIdx;
+          const txt = state.planTabs[t] && state.planTabs[t].items && state.planTabs[t].items[i] && state.planTabs[t].items[i].text;
+          if (txt) addToFocus(txt, 'plan');
+        });
+      });
+
+      // Meetings checkboxes (separate)
+      const mlist = document.getElementById('meetingsList');
+      if (mlist) {
+        mlist.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+          cb.addEventListener('change', e=>{
+            const mIdx = +e.target.dataset.meeting;
+            if (!active.meetings) active.meetings = [];
+            active.meetings[mIdx].done = e.target.checked;
+            saveState(); renderPlanTabs(filter); updateDashboard();
+          });
+        });
+      }
     }
 
     // helpers
     function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function saveState(){ localStorage.setItem(stateKey, JSON.stringify(state)); updateSavedList(); }
-    function loadState(){ const raw = localStorage.getItem(stateKey); if(raw){ state = Object.assign({ checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0 }, JSON.parse(raw)); } renderAll(); }
-    function renderAll(){ renderChecklist(); renderLists(); renderNotes(); renderPlanTabs(); }
+    function loadState(){
+      const raw = localStorage.getItem(stateKey);
+      if(raw){
+        const loaded = JSON.parse(raw);
+        state = Object.assign({ checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0, focusItems: [], prefs: { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false } }, loaded);
+        // migrate old prefs if needed
+        if (!state.prefs) state.prefs = { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false };
+      }
+      applyPrefs();
+      renderAll();
+    }
+    function renderAll(filter=''){
+      renderChecklist(filter);
+      renderLists(filter);
+      renderNotes();
+      renderPlanTabs(filter);
+      renderFocus();
+      updateDashboard();
+    }
 
     // UI bindings
     document.getElementById('addChecklist').addEventListener('click', ()=>{
-      const t = document.getElementById('newChecklistItem').value.trim(); if(!t) return; state.checklist.push({text:t,done:false}); document.getElementById('newChecklistItem').value=''; saveState(); renderChecklist();
+      const t = document.getElementById('newChecklistItem').value.trim(); if(!t) return; state.checklist.push({text:t,done:false}); document.getElementById('newChecklistItem').value=''; saveState(); renderChecklist(); updateDashboard();
     });
 
     document.getElementById('createList').addEventListener('click', ()=>{
-      const name = document.getElementById('listName').value.trim(); const items = document.getElementById('listItems').value.split('\n').map(s=>s.trim()).filter(Boolean); if(!name || !items.length) return alert('Provide name and at least one item'); state.lists.push({name,items}); document.getElementById('listName').value=''; document.getElementById('listItems').value=''; saveState(); renderLists();
+      const name = document.getElementById('listName').value.trim(); const items = document.getElementById('listItems').value.split('\n').map(s=>s.trim()).filter(Boolean); if(!name || !items.length) return alert('Provide name and at least one item'); state.lists.push({name,items}); document.getElementById('listName').value=''; document.getElementById('listItems').value=''; saveState(); renderLists(); updateDashboard();
     });
 
-    document.getElementById('clearLists').addEventListener('click', ()=>{ if(confirm('Clear all lists?')){ state.lists=[]; saveState(); renderLists(); }});
+    document.getElementById('clearLists').addEventListener('click', ()=>{ if(confirm('Clear all lists?')){ state.lists=[]; saveState(); renderLists(); updateDashboard(); }});
 
     document.getElementById('saveBtn').addEventListener('click', ()=>{ saveState(); alert('Saved to browser storage.'); });
     document.getElementById('loadBtn').addEventListener('click', ()=>{ loadState(); alert('Loaded state from browser storage.'); });
     document.getElementById('resetBtn').addEventListener('click', ()=>{
       if(!confirm('Reset the page and clear saved onboarding state?')) return;
       localStorage.removeItem(stateKey);
-      state = { checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0 };
+      state = { checklist: [], lists: [], notes: [], planTabs: [], activePlanTab: 0, focusItems: [], prefs: { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false } };
+      applyPrefs();
       renderAll(); updateSavedList();
       alert('Page reset. You can start over now.');
     });
@@ -277,7 +627,7 @@
         if(!r.ok) throw new Error('Could not fetch plan file');
         const txt = await r.text();
         importPlanMarkdown(txt);
-        saveState(); renderPlanTabs();
+        saveState(); renderPlanTabs(); renderFocus(); updateDashboard();
         alert('Plan imported as week tabs. You can mark items as done in the tab view.');
       }catch(e){ alert('Import failed: '+ e.message); }
     });
@@ -293,7 +643,7 @@
       reader.onload = function(evt){
         try{
           importPlanMarkdown(String(evt.target.result || ''));
-          saveState(); renderPlanTabs();
+          saveState(); renderPlanTabs(); renderFocus(); updateDashboard();
           alert('Plan imported from file.');
         }catch(err){ alert('Import failed: '+err.message); }
       };
@@ -302,40 +652,167 @@
       e.target.value = '';
     });
 
+    // ===== Neurodivergence-friendly controls wiring =====
+    // Font size
+    const fsPlus = document.getElementById('fsPlus');
+    const fsMinus = document.getElementById('fsMinus');
+    const fsReset = document.getElementById('fsReset');
+    if (fsPlus) fsPlus.addEventListener('click', ()=>{ state.prefs.fontScale = Math.min(1.4, (state.prefs.fontScale||1) + 0.08); saveState(); applyPrefs(); });
+    if (fsMinus) fsMinus.addEventListener('click', ()=>{ state.prefs.fontScale = Math.max(0.82, (state.prefs.fontScale||1) - 0.08); saveState(); applyPrefs(); });
+    if (fsReset) fsReset.addEventListener('click', ()=>{ state.prefs.fontScale = 1; saveState(); applyPrefs(); });
+
+    // Density toggle
+    const densityBtn = document.getElementById('densityBtn');
+    if (densityBtn) densityBtn.addEventListener('click', ()=>{
+      state.prefs.compact = !state.prefs.compact; saveState(); applyPrefs();
+    });
+
+    // Hide done
+    const hideDoneBtn = document.getElementById('hideDoneBtn');
+    if (hideDoneBtn) hideDoneBtn.addEventListener('click', ()=>{
+      state.prefs.hideDone = !state.prefs.hideDone; saveState(); applyPrefs(); renderAll();
+    });
+
+    // Theme variants
+    const calmBtn = document.getElementById('calmBtn');
+    if (calmBtn) calmBtn.addEventListener('click', ()=>{
+      state.prefs.calm = !state.prefs.calm; if (state.prefs.calm) state.prefs.highContrast = false; saveState(); applyPrefs();
+    });
+    const hcBtn = document.getElementById('hcBtn');
+    if (hcBtn) hcBtn.addEventListener('click', ()=>{
+      state.prefs.highContrast = !state.prefs.highContrast; if (state.prefs.highContrast) state.prefs.calm = false; saveState(); applyPrefs();
+    });
+
+    // Focus / distraction-free mode
+    const focusModeBtn = document.getElementById('focusModeBtn');
+    if (focusModeBtn) focusModeBtn.addEventListener('click', ()=>{
+      focusMode = !focusMode;
+      document.body.style.setProperty('--density', focusMode ? '0.95' : (state.prefs.compact ? '0.82' : '1'));
+      const nav = document.querySelector('nav');
+      if (nav) nav.style.display = focusMode ? 'none' : '';
+      const extraCards = document.querySelectorAll('main > section.card:not(#importedPlan):not(#checklist)');
+      extraCards.forEach(c => c.style.display = focusMode ? 'none' : '');
+      focusModeBtn.classList.toggle('active', focusMode);
+      focusModeBtn.textContent = focusMode ? 'Exit focus' : 'Focus mode';
+    });
+
+    // Quick search jump
+    const searchFocusBtn = document.getElementById('searchFocusBtn');
+    if (searchFocusBtn) searchFocusBtn.addEventListener('click', ()=>{
+      const s = document.getElementById('globalSearch');
+      if (s) { s.focus(); s.select(); }
+    });
+
+    // Global search (filters quick checklist + named lists)
+    const globalSearch = document.getElementById('globalSearch');
+    if (globalSearch) {
+      globalSearch.addEventListener('input', ()=>{
+        const q = globalSearch.value;
+        renderChecklist(q);
+        renderLists(q);
+        const res = document.getElementById('searchResults');
+        if (res) {
+          let count = 0;
+          // rough count
+          state.checklist.forEach(i => { if (!state.prefs.hideDone || !i.done) if (!q || i.text.toLowerCase().includes(q.toLowerCase())) count++; });
+          state.lists.forEach(l => (l.items||[]).forEach(it => { if (!state.prefs.hideDone || !it.done) if (!q || (it.text||'').toLowerCase().includes(q.toLowerCase())) count++; }));
+          res.textContent = q ? `${count} matching items` : '';
+        }
+      });
+    }
+
+    // Per-plan tab search
+    const planSearch = document.getElementById('planSearch');
+    if (planSearch) {
+      planSearch.addEventListener('input', ()=>{
+        renderPlanTabs(planSearch.value);
+      });
+    }
+
+    // Clear focus panel
+    const clearFocusBtn = document.getElementById('clearFocusBtn');
+    if (clearFocusBtn) clearFocusBtn.addEventListener('click', ()=>{
+      if (confirm('Clear all Focus Today items?')) {
+        state.focusItems = [];
+        saveState(); renderFocus(); updateDashboard();
+      }
+    });
+
+    // Improve Enter key on quick checklist
+    const newItem = document.getElementById('newChecklistItem');
+    if (newItem) {
+      newItem.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const t = newItem.value.trim(); if(!t) return;
+          state.checklist.push({text:t,done:false}); newItem.value=''; saveState(); renderChecklist(); updateDashboard();
+        }
+      });
+    }
+
     function importPlanMarkdown(md){
       const lines = md.split(/\r?\n/);
       let current = null;
       const newTabs = [];
+      let inMeetings = false;
+
       for(const raw of lines){
         const line = raw.trim();
-        if(!line) continue;
+        if(!line) { inMeetings = false; continue; }
+
         const h = line.match(/^(#{2,3})\s+(.*)$/);
         if(h){
           const title = h[2].trim();
           if(/week/i.test(title)){
-            current = {name: title, items: []};
+            current = {name: title, items: [], meetings: [], goal: ''};
             newTabs.push(current);
+            inMeetings = false;
           }
           continue;
         }
+
+        // Capture **Weekly Goal:** or Weekly Goal lines (very valuable for ND users)
+        const goalMatch = line.match(/\*\*Weekly Goal[:\*]?\*\*?\s*(.*)$/i) || line.match(/^Weekly Goal[:\*]?\s*(.*)$/i);
+        if (goalMatch && current) {
+          current.goal = (goalMatch[1] || '').replace(/^\*\*|\*\*$/g,'').trim();
+          continue;
+        }
+
+        // Detect "Meetings to Schedule" section
+        if (/^###?\s*Meetings to Schedule/i.test(line) || /Meetings to Schedule/i.test(line)) {
+          inMeetings = true;
+          continue;
+        }
+        if (/^###?\s*[A-Za-z]/.test(line) && !/^[-*]/.test(line)) inMeetings = false;
+
         const c = line.match(/^[-*]\s+\[( |x|X)\]\s+(.*)$/);
-        if(c && current){ current.items.push({text: c[2].trim(), done: c[1].toLowerCase() === 'x'}); continue; }
+        if(c && current){
+          const obj = {text: c[2].trim(), done: c[1].toLowerCase() === 'x'};
+          if (inMeetings) current.meetings.push(obj);
+          else current.items.push(obj);
+          continue;
+        }
         const b = line.match(/^[-*]\s+(.*)$/);
-        if(b && current){ current.items.push({text: b[1].trim(), done:false}); continue; }
-        // include plain section headings as notes inside the current week
+        if(b && current){
+          const obj = {text: b[1].trim(), done:false};
+          if (inMeetings) current.meetings.push(obj);
+          else current.items.push(obj);
+          continue;
+        }
         const inlineHeader = line.match(/^([A-Za-z ]+):$/);
-        if(inlineHeader && current){ current.items.push({text: `${inlineHeader[1].trim()}:`, done:false}); }
+        if(inlineHeader && current && !inMeetings){ current.items.push({text: `${inlineHeader[1].trim()}:`, done:false}); }
       }
-      state.planTabs = newTabs.filter(tab => tab.items && tab.items.length);
+      state.planTabs = newTabs.filter(tab => (tab.items && tab.items.length) || (tab.meetings && tab.meetings.length));
       state.activePlanTab = 0;
     }
 
     function buildMarkdown(){
       let md = '# Onboarding Notes and Checklists\n\n';
-      md += '## Checklist\n';
+      md += '## Focus Today (pinned priorities)\n';
+      (state.focusItems || []).forEach(i=> md += `- [${i.done ? 'x' : ' '}] ${i.text}\n`);
+      md += '\n## Quick Checklist\n';
       state.checklist.forEach(i=> md += `- [${i.done ? 'x' : ' '}] ${i.text}\n`);
       md += '\n## Lists\n';
-      state.lists.forEach(l=>{ md += `### ${l.name}\n`; l.items.forEach(it=> md += `- ${it}\n`); md += '\n'; });
+      state.lists.forEach(l=>{ md += `### ${l.name}\n`; (l.items||[]).forEach(it=> md += `- [${it.done?'x':' '}] ${it.text}\n`); md += '\n'; });
       md += '\n## Notes\n';
       state.notes.forEach(n=> md += `### ${n.title} — ${new Date(n.t).toLocaleString()}\n${n.body}\n\n`);
       return md;
@@ -348,6 +825,20 @@
     // init
     loadState(); updateSavedList();
 
+    // Gentle first-run seeding of ND-friendly lists (low pressure, high value)
+    (function maybeSeedStarters(){
+      if ((state.lists && state.lists.length) || (state.checklist && state.checklist.length) || (state.planTabs && state.planTabs.length)) return;
+      state.lists = [
+        {name: 'Open Questions', items: [{text:'Questions for my manager', done:false}, {text:'Questions for IT/Security', done:false}]},
+        {name: 'Key Stakeholders', items: []},
+        {name: 'Access & Logins to Verify', items: [{text:'Azure Portal', done:false}, {text:'Entra ID / PIM', done:false}, {text:'VPN', done:false}, {text:'Key Vaults', done:false}]},
+        {name: 'Documents to Create (inventory, diagrams, runbooks)', items: []}
+      ];
+      saveState();
+      renderLists();
+      updateDashboard();
+    })();
+
     // Attempt auto-import of the plan when page loads if no lists exist.
     // Try fetching the MD first; if fetch fails (common when opened via file://),
     // open the file chooser so the user can pick the local file.
@@ -355,7 +846,7 @@
       try{
         if(state.planTabs && state.planTabs.length) return; // don't auto-import if plan tabs already exist
         const r = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
-        if(r.ok){ const txt = await r.text(); importPlanMarkdown(txt); saveState(); renderPlanTabs(); console.log('Plan auto-imported from same folder'); return; }
+        if(r.ok){ const txt = await r.text(); importPlanMarkdown(txt); saveState(); renderPlanTabs(); renderFocus(); updateDashboard(); console.log('Plan auto-imported from same folder'); return; }
       }catch(e){ /* fetch likely blocked for file:// */ }
       // fallback: open file picker (may be blocked by some browsers without user gesture)
       try{ document.getElementById('chooseFileBtn').click(); }catch(e){ /* ignore */ }
