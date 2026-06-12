@@ -13,6 +13,21 @@ const START_DATE = new Date('2026-06-29');
 
 let currentPlanFilter = '';
 let focusMode = false;
+let KB_CACHE = null;
+
+async function loadKnowledgeBase() {
+  if (KB_CACHE) return KB_CACHE;
+  try {
+    const res = await fetch('/api/kb');
+    if (res.ok) {
+      KB_CACHE = await res.json();
+      return KB_CACHE;
+    }
+  } catch (e) {
+    console.warn('Could not load KB from Azure, using local fallback');
+  }
+  return null;
+}
 
 function getCurrentDay() {
   const now = new Date();
@@ -258,6 +273,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   loadLocalPlan();           // includes focus + prefs
   applyPrefs();
   attachHandlers();
+
+  // Load the Azure Knowledge Base early (powers discovery questions + can be used by MCP)
+  loadKnowledgeBase().then(kb => {
+    if (kb) {
+      window.ONBOARDING_KB = kb;
+      // Re-render plan tabs if already loaded so discovery pulls from server
+      if (state.tabs && state.tabs.length) renderPlanTabs();
+    }
+  });
+
   await refreshAuth();
   if (state.user) {
     await tryAutoLoadPlan();
