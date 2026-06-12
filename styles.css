@@ -70,6 +70,24 @@ button, input, textarea {
   color: var(--muted);
 }
 
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-with-logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 36px;
+  width: auto;
+  border-radius: 6px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
 .header-actions {
   display: flex;
   flex-wrap: wrap;
