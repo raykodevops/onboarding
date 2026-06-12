@@ -3,16 +3,25 @@ const state = {
   activeTab: 0,
   notes: [],
   user: null,
+  // ND-friendly additions (local only)
+  focusItems: [],
+  prefs: { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false }
 };
 
+let currentPlanFilter = '';
+let focusMode = false;
+
 window.addEventListener('DOMContentLoaded', async () => {
+  loadLocalPlan();           // includes focus + prefs
+  applyPrefs();
   attachHandlers();
-  loadLocalPlan();
   await refreshAuth();
   if (state.user) {
     await tryAutoLoadPlan();
   }
   render();
+  updateDashboard();
+  renderFocus();
 });
 
 function attachHandlers() {
@@ -27,6 +36,65 @@ function attachHandlers() {
   document.getElementById('addNoteBtn').addEventListener('click', addNote);
   document.getElementById('saveNotesBtn').addEventListener('click', saveNotes);
   document.getElementById('loadNotesBtn').addEventListener('click', loadNotes);
+
+  // ND comfort controls
+  const fsPlus = document.getElementById('fsPlus');
+  const fsMinus = document.getElementById('fsMinus');
+  const fsReset = document.getElementById('fsReset');
+  if (fsPlus) fsPlus.addEventListener('click', () => { state.prefs.fontScale = Math.min(1.35, (state.prefs.fontScale || 1) + 0.08); savePrefs(); applyPrefs(); });
+  if (fsMinus) fsMinus.addEventListener('click', () => { state.prefs.fontScale = Math.max(0.85, (state.prefs.fontScale || 1) - 0.08); savePrefs(); applyPrefs(); });
+  if (fsReset) fsReset.addEventListener('click', () => { state.prefs.fontScale = 1; savePrefs(); applyPrefs(); });
+
+  const densityBtn = document.getElementById('densityBtn');
+  if (densityBtn) densityBtn.addEventListener('click', () => {
+    state.prefs.compact = !state.prefs.compact; savePrefs(); applyPrefs();
+  });
+
+  const hideDoneBtn = document.getElementById('hideDoneBtn');
+  if (hideDoneBtn) hideDoneBtn.addEventListener('click', () => {
+    state.prefs.hideDone = !state.prefs.hideDone; savePrefs(); applyPrefs(); renderPlanTabs();
+  });
+
+  const calmBtn = document.getElementById('calmBtn');
+  if (calmBtn) calmBtn.addEventListener('click', () => {
+    state.prefs.calm = !state.prefs.calm;
+    if (state.prefs.calm) state.prefs.highContrast = false;
+    savePrefs(); applyPrefs();
+  });
+
+  const hcBtn = document.getElementById('hcBtn');
+  if (hcBtn) hcBtn.addEventListener('click', () => {
+    state.prefs.highContrast = !state.prefs.highContrast;
+    if (state.prefs.highContrast) state.prefs.calm = false;
+    savePrefs(); applyPrefs();
+  });
+
+  const focusModeBtn = document.getElementById('focusModeBtn');
+  if (focusModeBtn) focusModeBtn.addEventListener('click', () => {
+    focusMode = !focusMode;
+    const notesCard = document.querySelector('section.card:nth-of-type(2)');
+    if (notesCard) notesCard.style.display = focusMode ? 'none' : '';
+    focusModeBtn.classList.toggle('active', focusMode);
+    focusModeBtn.textContent = focusMode ? 'Exit focus' : 'Focus mode';
+  });
+
+  const planSearch = document.getElementById('planSearch');
+  if (planSearch) {
+    planSearch.addEventListener('input', () => {
+      currentPlanFilter = planSearch.value || '';
+      renderPlanTabs();
+    });
+  }
+
+  const clearFocusBtn = document.getElementById('clearFocusBtn');
+  if (clearFocusBtn) clearFocusBtn.addEventListener('click', () => {
+    if (confirm('Clear all Focus Today items?')) {
+      state.focusItems = [];
+      savePrefs(); // reuse the prefs saver for simplicity (or dedicated)
+      renderFocus();
+      updateDashboard();
+    }
+  });
 }
 
 async function refreshAuth() {
@@ -124,6 +192,8 @@ function showLoginGate() {
 async function tryAutoLoadPlan() {
   if (state.tabs && state.tabs.length) {
     renderPlanTabs();
+    updateDashboard();
+    renderFocus();
     return;
   }
   try {
@@ -144,6 +214,8 @@ async function fetchPlanFromSite() {
     state.activeTab = 0;
     saveLocalPlan();
     renderPlanTabs();
+    updateDashboard();
+    renderFocus();
     message.textContent = `Loaded ${state.tabs.length} plan weeks from site.`;
   } catch (err) {
     message.textContent = 'Unable to load plan from site. Use local import instead.';
@@ -160,6 +232,8 @@ function handlePlanFile(event) {
     state.activeTab = 0;
     saveLocalPlan();
     renderPlanTabs();
+    updateDashboard();
+    renderFocus();
     document.getElementById('planMessage').textContent = `Loaded ${state.tabs.length} plan weeks from file.`;
   };
   reader.readAsText(file);
@@ -170,30 +244,57 @@ function parsePlanMarkdown(markdown) {
   const lines = markdown.split(/\r?\n/);
   const tabs = [];
   let current = null;
+  let inMeetings = false;
+
   for (const raw of lines) {
     const line = raw.trim();
-    if (!line) continue;
+    if (!line) {
+      inMeetings = false;
+      continue;
+    }
+
     const weekMatch = line.match(/^##\s+(Week\s*\d+.*)$/i);
     if (weekMatch) {
-      current = { name: weekMatch[1], items: [] };
+      current = { name: weekMatch[1], items: [], meetings: [], goal: '' };
       tabs.push(current);
+      inMeetings = false;
       continue;
     }
     if (!current) continue;
+
+    // Weekly Goal (very valuable for ND users)
+    const goalMatch = line.match(/\*\*Weekly Goal[:\*]?\*\*?\s*(.*)$/i) || line.match(/^Weekly Goal[:\*]?\s*(.*)$/i);
+    if (goalMatch && current) {
+      current.goal = (goalMatch[1] || '').replace(/^\*\*|\*\*$/g, '').trim();
+      continue;
+    }
+
+    // Meetings section
+    if (/^###?\s*Meetings to Schedule/i.test(line) || /Meetings to Schedule/i.test(line)) {
+      inMeetings = true;
+      continue;
+    }
+    if (/^###?\s*[A-Za-z]/.test(line) && !/^[-*]/.test(line)) inMeetings = false;
+
+    const checkMatch = line.match(/^[-*]\s+\[( |x|X)\]\s+(.*)$/);
+    if (checkMatch) {
+      const obj = { text: checkMatch[2], done: checkMatch[1].toLowerCase() === 'x' };
+      if (inMeetings) current.meetings.push(obj);
+      else current.items.push(obj);
+      continue;
+    }
+
+    const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+    if (bulletMatch) {
+      const obj = { text: bulletMatch[1], done: false };
+      if (inMeetings) current.meetings.push(obj);
+      else current.items.push(obj);
+      continue;
+    }
+
     const sectionMatch = line.match(/^###\s+(.*)$/);
     if (sectionMatch) {
       current.items.push({ text: sectionMatch[1], done: false, meta: true });
-      continue;
-    }
-    const checkMatch = line.match(/^[-*]\s+\[( |x|X)\]\s+(.*)$/);
-    if (checkMatch) {
-      current.items.push({ text: checkMatch[2], done: checkMatch[1].toLowerCase() === 'x' });
-      continue;
-    }
-    const bulletMatch = line.match(/^[-*]\s+(.*)$/);
-    if (bulletMatch) {
-      current.items.push({ text: bulletMatch[1], done: false });
-      continue;
     }
   }
   return tabs;
@@ -202,6 +303,8 @@ function parsePlanMarkdown(markdown) {
 function render() {
   renderPlanTabs();
   renderNotes();
+  updateDashboard();
+  renderFocus();
 }
 
 function renderPlanTabs() {
@@ -209,11 +312,14 @@ function renderPlanTabs() {
   const content = document.getElementById('planTabContent');
   tabsContainer.innerHTML = '';
   content.innerHTML = '';
+
   if (!state.tabs || !state.tabs.length) {
     content.innerHTML = '<div class="muted">No plan loaded. Load the plan from the site or import a local Markdown file.</div>';
+    updateDashboard();
     return;
   }
 
+  // Tabs
   state.tabs.forEach((tab, index) => {
     const button = document.createElement('button');
     button.className = `tab-button${index === state.activeTab ? ' active' : ''}`;
@@ -221,6 +327,9 @@ function renderPlanTabs() {
     button.textContent = tab.name;
     button.addEventListener('click', () => {
       state.activeTab = index;
+      currentPlanFilter = '';
+      const s = document.getElementById('planSearch');
+      if (s) s.value = '';
       saveLocalPlan();
       renderPlanTabs();
     });
@@ -228,24 +337,85 @@ function renderPlanTabs() {
   });
 
   const active = state.tabs[state.activeTab] || state.tabs[0];
-  const html = ['<h3>' + escapeHtml(active.name) + '</h3>', '<ul class="checklist">'];
+  if (!active) return;
+
+  let html = `<h3>${escapeHtml(active.name)}</h3>`;
+
+  // Prominent Weekly Goal (ND gold)
+  if (active.goal) {
+    html += `<div class="plan-meta"><strong>🎯 Weekly Goal:</strong> ${escapeHtml(active.goal)}</div>`;
+  }
+
+  // Separate Meetings to Schedule (actionable, high value)
+  if (active.meetings && active.meetings.length) {
+    html += `<div style="margin:6px 0 4px;font-size:0.9em;color:#9cc8ff"><strong>Meetings to schedule</strong></div>`;
+    html += `<ul class="checklist meetings-list">`;
+    active.meetings.forEach((m, mIdx) => {
+      const hide = state.prefs.hideDone && m.done;
+      if (hide) return;
+      const ch = m.done ? 'checked' : '';
+      html += `<li><label><input type="checkbox" data-meeting="${mIdx}" ${ch}> ${escapeHtml(m.text)}</label></li>`;
+    });
+    html += `</ul>`;
+  }
+
+  // Main items + filter support + pin buttons
+  html += `<ul class="checklist" id="mainPlanItems">`;
+  const filter = (currentPlanFilter || '').toLowerCase();
+  const hideDone = !!state.prefs.hideDone;
+
   active.items.forEach((item, idx) => {
+    if (hideDone && item.done) return;
+    const text = item.text || '';
+    if (filter && !text.toLowerCase().includes(filter)) return;
+
     const checked = item.done ? 'checked' : '';
     const isMeta = !!item.meta;
-    html.push('<li>' +
-      `<label><input type="checkbox" data-idx="${idx}" ${checked} ${isMeta ? 'disabled' : ''}>` +
-      `<span class="${isMeta ? 'muted' : ''}">${escapeHtml(item.text)}</span></label></li>`);
+    const spanClass = isMeta ? 'muted' : '';
+    html += `<li>
+      <label><input type="checkbox" data-idx="${idx}" ${checked} ${isMeta ? 'disabled' : ''}>
+      <span class="${spanClass}">${escapeHtml(text)}</span></label>
+      <button class="btn btn-secondary" data-pin-idx="${idx}" style="padding:2px 8px;font-size:0.7em;margin-left:6px;background:rgba(84,167,255,0.12);color:#9cc8ff;border:none;">Pin</button>
+    </li>`;
   });
-  html.push('</ul>');
-  content.innerHTML = html.join('');
+  html += `</ul>`;
 
-  content.querySelectorAll('input[type=checkbox]').forEach((checkbox) => {
-    checkbox.addEventListener('change', (event) => {
-      const idx = Number(event.target.dataset.idx);
-      state.tabs[state.activeTab].items[idx].done = event.target.checked;
+  content.innerHTML = html;
+
+  // Main plan checkboxes
+  content.querySelectorAll('#mainPlanItems input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      state.tabs[state.activeTab].items[idx].done = e.target.checked;
       saveLocalPlan();
+      updateDashboard();
+      renderFocus();
     });
   });
+
+  // Pin buttons for plan items
+  content.querySelectorAll('[data-pin-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.pinIdx);
+      const item = (state.tabs[state.activeTab] || {}).items[idx];
+      if (item && item.text) addToFocus(item.text);
+    });
+  });
+
+  // Meetings checkboxes (separate)
+  content.querySelectorAll('.meetings-list input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const mIdx = Number(e.target.dataset.meeting);
+      const act = state.tabs[state.activeTab];
+      if (act && act.meetings && act.meetings[mIdx]) {
+        act.meetings[mIdx].done = e.target.checked;
+        saveLocalPlan();
+        updateDashboard();
+      }
+    });
+  });
+
+  updateDashboard();
 }
 
 function addNote() {
@@ -344,6 +514,134 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;');
 }
 
+/* =====================================================
+   ND-friendly helpers (progress, focus pinning, prefs,
+   richer plan rendering with goals + meetings)
+   ===================================================== */
+
+function applyPrefs() {
+  const body = document.body;
+  body.style.setProperty('--font-scale', state.prefs.fontScale || 1);
+
+  body.classList.toggle('compact', !!state.prefs.compact);
+  body.classList.toggle('calm', !!state.prefs.calm);
+  body.classList.toggle('high-contrast', !!state.prefs.highContrast);
+
+  // Update active state on control buttons
+  const ids = ['densityBtn', 'hideDoneBtn', 'calmBtn', 'hcBtn'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === 'densityBtn') el.classList.toggle('active', !!state.prefs.compact);
+    if (id === 'hideDoneBtn') el.classList.toggle('active', !!state.prefs.hideDone);
+    if (id === 'calmBtn') el.classList.toggle('active', !!state.prefs.calm);
+    if (id === 'hcBtn') el.classList.toggle('active', !!state.prefs.highContrast);
+  });
+}
+
+function updateDashboard() {
+  const container = document.getElementById('ndDashboard');
+  if (!container) return;
+
+  let done = 0, total = 0;
+  (state.tabs || []).forEach(tab => {
+    (tab.items || []).forEach(it => {
+      if (!it.meta) { total++; if (it.done) done++; }
+    });
+  });
+
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  // Derive phase/week from active tab name
+  let phase = 'Phase 1 — Orientation';
+  let weekLabel = '—';
+  const active = (state.tabs || [])[state.activeTab];
+  if (active && active.name) {
+    const m = active.name.match(/week\s*(\d+)/i);
+    if (m) {
+      const w = parseInt(m[1], 10);
+      weekLabel = 'Week ' + w;
+      if (w >= 9) phase = 'Phase 3 — Ownership';
+      else if (w >= 5) phase = 'Phase 2 — Building Competency';
+    }
+  }
+
+  container.innerHTML = `
+    <div class="nd-dash-card">
+      <div class="label">OVERALL PROGRESS</div>
+      <div class="big">${pct}%</div>
+      <div class="nd-progress"><div style="width:${pct}%"></div></div>
+    </div>
+    <div class="nd-dash-card">
+      <div class="label">CURRENT FOCUS</div>
+      <div class="big">${phase}</div>
+      <div style="margin-top:3px;font-size:0.8em;color:var(--muted)">${weekLabel} &nbsp;•&nbsp; ${done}/${total} items</div>
+    </div>
+    <div class="nd-dash-card">
+      <div class="label">QUICK WINS</div>
+      <div style="font-size:0.92em;color:#9cc8ff">Pin up to 3 items in Focus Today</div>
+    </div>
+  `;
+}
+
+function renderFocus() {
+  const container = document.getElementById('ndFocusList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const items = state.focusItems || [];
+  if (!items.length) {
+    container.innerHTML = '<div style="color:#7fa8d8;font-size:0.9em;padding:4px 2px;">Nothing pinned yet. Use the Pin buttons on plan items below.</div>';
+    return;
+  }
+
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'nd-focus-item';
+    const doneStyle = item.done ? 'opacity:0.6;text-decoration:line-through' : '';
+    row.innerHTML = `
+      <input type="checkbox" ${item.done ? 'checked' : ''}>
+      <span style="flex:1;${doneStyle}">${escapeHtml(item.text)}</span>
+      <button class="remove" data-idx="${idx}">remove</button>
+    `;
+
+    const cb = row.querySelector('input');
+    cb.addEventListener('change', () => {
+      state.focusItems[idx].done = cb.checked;
+      savePrefs();
+      renderFocus();
+      // Also try to reflect in main plan if possible (best effort)
+      updateDashboard();
+    });
+
+    row.querySelector('.remove').addEventListener('click', () => {
+      state.focusItems.splice(idx, 1);
+      savePrefs();
+      renderFocus();
+      updateDashboard();
+    });
+
+    container.appendChild(row);
+  });
+}
+
+function addToFocus(text) {
+  if (!state.focusItems) state.focusItems = [];
+  if (state.focusItems.length >= 3) {
+    alert('Focus Today supports max 3 items. This helps prevent decision fatigue and overwhelm.');
+    return;
+  }
+  if (state.focusItems.some(f => f.text === text)) return;
+  state.focusItems.push({ text, done: false });
+  savePrefs();
+  renderFocus();
+  updateDashboard();
+}
+
+function updateNdButtons() {
+  // Called from applyPrefs already
+}
+
 function saveLocalPlan() {
   localStorage.setItem('onboardingPlanTabs', JSON.stringify(state.tabs));
   localStorage.setItem('onboardingActiveTab', String(state.activeTab));
@@ -360,4 +658,20 @@ function loadLocalPlan() {
     state.tabs = [];
     state.activeTab = 0;
   }
+
+  // ND state (focus + prefs)
+  try {
+    const f = localStorage.getItem('onboardingFocusItems');
+    if (f) state.focusItems = JSON.parse(f);
+  } catch { state.focusItems = []; }
+
+  try {
+    const p = localStorage.getItem('onboardingPrefs');
+    if (p) state.prefs = Object.assign({ fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false }, JSON.parse(p));
+  } catch {}
+}
+
+function savePrefs() {
+  localStorage.setItem('onboardingFocusItems', JSON.stringify(state.focusItems || []));
+  localStorage.setItem('onboardingPrefs', JSON.stringify(state.prefs || {}));
 }

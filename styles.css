@@ -17,6 +17,7 @@ html, body {
   background: radial-gradient(circle at top, rgba(18, 78, 163, 0.22), transparent 28%),
               linear-gradient(180deg, #09101a 0%, #06101a 100%);
   color: var(--text);
+  font-size: calc(15px * var(--font-scale, 1));
 }
 
 .auth-gate {
@@ -295,4 +296,174 @@ footer.page-footer.hidden {
   .page-body {
     grid-template-columns: minmax(360px, 1fr) minmax(360px, 1.2fr);
   }
+}
+
+/* ============================================
+   Neurodivergent-friendly additions
+   Progress dashboard, Focus Today, comfort controls,
+   richer plan display (goals, meetings), filters
+   ============================================ */
+
+.nd-dashboard {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nd-dash-card {
+  background: rgba(17, 27, 42, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.nd-dash-card .label {
+  font-size: 0.72em;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+.nd-dash-card .big {
+  font-size: 1.4em;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.nd-progress {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.nd-progress > div {
+  height: 100%;
+  background: var(--accent);
+  transition: width .2s ease;
+}
+
+.nd-focus {
+  grid-column: 1 / -1;
+  background: #0c1a2e;
+  border: 2px solid rgba(84, 167, 255, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.nd-focus h3 {
+  margin: 0 0 8px;
+  font-size: 0.95em;
+  color: #9cc8ff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nd-focus .hint {
+  font-size: 0.72em;
+  font-weight: 400;
+  color: #7fa8d8;
+}
+
+.nd-focus-list {
+  display: grid;
+  gap: 6px;
+}
+
+.nd-focus-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  font-size: 0.95em;
+}
+
+.nd-focus-item .remove {
+  background: none;
+  border: none;
+  color: #ff8a8a;
+  font-size: 0.78em;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.nd-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0 12px;
+  padding: 4px 0;
+}
+
+.nd-controls span {
+  font-size: 0.75em;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.nd-controls button {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 4px 10px;
+  font-size: 0.78em;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.nd-controls button.active {
+  background: var(--accent);
+  color: #06101a;
+  border-color: var(--accent);
+}
+
+.compact .card { padding: 16px; }
+.compact .nd-focus { padding: 10px 12px; }
+
+.plan-meta {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(84,167,255,0.2);
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin: 8px 0 10px;
+  font-size: 0.92em;
+}
+
+.plan-meta strong {
+  color: #9cc8ff;
+}
+
+.meetings-list {
+  margin: 8px 0 12px;
+  padding-left: 4px;
+}
+
+.search-row {
+  margin: 6px 0 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.search-row input {
+  flex: 1;
+  font-size: 0.92em;
+  padding: 7px 11px;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.68em;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(84, 167, 255, 0.15);
+  color: #9cc8ff;
+  margin-left: 6px;
+  vertical-align: middle;
 }

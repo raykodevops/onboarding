@@ -30,9 +30,21 @@
   </section>
 
   <main class="page-body">
+    <!-- Neurodivergent supports: always-visible progress + focus area (executive function) -->
+    <div id="ndDashboard" class="nd-dashboard" aria-label="Onboarding progress overview"></div>
+
+    <div id="ndFocus" class="nd-focus">
+      <h3>
+        🎯 Focus Today
+        <span class="hint">(pin 1–3 priorities — reduces overwhelm)</span>
+        <button id="clearFocusBtn" class="btn btn-secondary" style="padding:3px 9px;font-size:0.7em;">Clear</button>
+      </h3>
+      <div id="ndFocusList"></div>
+    </div>
+
     <section class="card">
-      <h2>Plan import</h2>
-      <p class="muted">Load the 90-day plan and review it as week tabs.</p>
+      <h2>Plan import <span class="pill">ND-enhanced</span></h2>
+      <p class="muted">Interactive week tabs with Weekly Goals highlighted, separate Meetings lists, progress tracking, and focus pinning.</p>
       <div class="button-row">
         <button id="fetchPlanBtn" class="btn">Load plan from site</button>
         <button id="choosePlanFileBtn" class="btn btn-secondary">Import local plan file</button>
@@ -40,6 +52,24 @@
         <input id="planFile" type="file" accept=".md,.txt" class="hidden" />
       </div>
       <div id="planMessage" class="info-text"></div>
+
+      <!-- Comfort & focus controls (sensory + cognitive load) -->
+      <div class="nd-controls" id="ndControls" aria-label="Comfort and display settings">
+        <span>Comfort:</span>
+        <button id="fsMinus" title="Smaller text">A−</button>
+        <button id="fsReset" title="Reset text size">A</button>
+        <button id="fsPlus" title="Larger text">A+</button>
+        <button id="densityBtn" title="Toggle spacing">Density</button>
+        <button id="hideDoneBtn" title="Hide completed items">Hide done</button>
+        <button id="calmBtn" title="Lower saturation">Calm</button>
+        <button id="hcBtn" title="Higher contrast">Hi-Contrast</button>
+        <button id="focusModeBtn" title="Hide notes for focus on plan">Focus mode</button>
+      </div>
+
+      <div class="search-row">
+        <input id="planSearch" type="text" placeholder="Filter current week items..." />
+      </div>
+
       <div id="planTabs" class="tab-bar"></div>
       <div id="planTabContent" class="tab-panel"></div>
     </section>
