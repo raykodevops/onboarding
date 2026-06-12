@@ -16,7 +16,15 @@ let focusMode = false;
 
 function getCurrentDay() {
   const now = new Date();
-  const diffMs = now - START_DATE;
+  // Compare dates only (ignore time of day) using local time
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
+
+  if (today < start) {
+    return 0; // Do not start counting days until the actual first day (June 29)
+  }
+
+  const diffMs = today - start;
   let d = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
   return Math.max(1, Math.min(90, d));
 }
@@ -594,7 +602,6 @@ function updateDashboard() {
   const planPct = planTotal > 0 ? Math.round((planDone / planTotal) * 100) : 0;
 
   const currentDay = getCurrentDay();
-  const dayText = `Day ${currentDay} of 90`;
 
   // Derive phase/week from active tab name (fallback)
   let phase = 'Phase 1 — Orientation';
@@ -614,11 +621,21 @@ function updateDashboard() {
   const goalsDone = goals.filter(g => g.done).length;
   const goalsText = goals.length ? `${goalsDone}/${goals.length} goals` : 'No goals yet';
 
+  let dayText;
+  let timelineSub;
+  if (currentDay === 0) {
+    dayText = "Starts June 29";
+    timelineSub = `Your first day — tracking begins then (Day 1)`;
+  } else {
+    dayText = `Day ${currentDay} of 90`;
+    timelineSub = `${phase} &nbsp;•&nbsp; ${weekLabel}`;
+  }
+
   container.innerHTML = `
     <div class="nd-dash-card">
-      <div class="label">TIMELINE (started June 29, 2026)</div>
+      <div class="label">TIMELINE (starts June 29, 2026)</div>
       <div class="big">${dayText}</div>
-      <div style="margin-top:3px;font-size:0.8em;color:var(--muted)">${phase} &nbsp;•&nbsp; ${weekLabel}</div>
+      <div style="margin-top:3px;font-size:0.8em;color:var(--muted)">${timelineSub}</div>
     </div>
     <div class="nd-dash-card">
       <div class="label">PLAN PROGRESS</div>
