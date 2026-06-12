@@ -63,93 +63,14 @@ const DEFAULT_GOALS = [
   { text: "Build and deliver knowledge transfer to the team (updated runbooks + at least one peer training/review session)", done: false }
 ];
 
-// Per-week topic + rich discovery content for the interactive tabs.
-// Each week gets: a clear topic, targeted discovery questions with answer fields,
-// the existing checklist, and practical discovery ideas (commands, docs to create, questions to ask).
+// Discovery data source of truth is now the free Azure KB at /api/kb (populated from the same rich data).
+// This WEEK_DATA block is kept only as a local fallback if the API is unreachable (keeps the app working offline).
 const WEEK_DATA = {
-  "Week 1: Welcome & Systems Setup": {
-    topic: "Onboarding & Systems Setup",
-    discovery: [
-      { id: "hr-contacts", q: "Who are the key HR, IT, and manager contacts? What are their preferred communication methods?" },
-      { id: "accounts-list", q: "List every account, portal, and MFA method you now have. Any missing access?" },
-      { id: "emergency-procedures", q: "What are the company emergency procedures and who to contact in an incident?" },
-      { id: "vpn-azure-access", q: "Is VPN + Azure access fully working? Any delays or issues during setup?" }
-    ],
-    ideas: [
-      "Bookmark all important portals (Azure, Entra, DevOps, etc.)",
-      "Set up a personal 'Onboarding Notes' folder or OneNote section immediately",
-      "Join all relevant Teams channels and distribution lists",
-      "Document your laptop setup steps for future reference",
-      "Ask for a 'buddy' or mentor if not already assigned"
-    ]
-  },
-  "Week 2: Company Fundamentals": {
-    topic: "Company & Role Fundamentals",
-    discovery: [
-      { id: "mission-values", q: "What is the company mission, values, and current strategic priorities?" },
-      { id: "org-structure", q: "Draw or list the org chart for your team and key stakeholders (who reports to whom)?" },
-      { id: "azure-usage", q: "At a high level, how does the company use Azure today (workloads, regions, critical apps)?" },
-      { id: "compliance", q: "What compliance frameworks apply (SOC2, ISO, industry specific)? Where is evidence stored?" }
-    ],
-    ideas: [
-      "Read the latest company news and investor updates",
-      "Request a 30-min 1:1 with your manager specifically on 'how success is measured here'",
-      "Identify 3-4 key stakeholders outside your immediate team",
-      "Review any existing Azure governance / tagging policies"
-    ]
-  },
-  "Week 3: Azure Environment Discovery": {
-    topic: "Azure Environment Discovery",
-    discovery: [
-      { id: "subscriptions", q: "List all subscriptions + their purposes, owners, and billing contacts." },
-      { id: "resource-groups", q: "What are the main resource groups? Any naming conventions or ownership?" },
-      { id: "architecture", q: "Can you draw a high-level current-state architecture (even rough)?" },
-      { id: "naming-conventions", q: "What are the current naming conventions for resources, RGs, VNets?" },
-      { id: "cost-baseline", q: "What does the current monthly spend look like and who owns the budget?" }
-    ],
-    ideas: [
-      "Run: az account list, az group list, az resource list",
-      "Use Azure Resource Graph Explorer for cross-subscription queries",
-      "Export a subscription summary and save it to your inventory doc",
-      "Ask: 'What are the most critical production workloads right now?'"
-    ]
-  },
-  "Week 4: Deep-Dive Planning & First Tasks": {
-    topic: "Planning & 30-Day Review",
-    discovery: [
-      { id: "critical-systems", q: "List the top 5-7 most critical systems/applications and who depends on them." },
-      { id: "recent-issues", q: "What recent incidents or concerns have the team dealt with?" },
-      { id: "runbooks", q: "Where are existing runbooks and documentation stored? How up-to-date are they?" },
-      { id: "metrics", q: "What metrics or reports does leadership actually care about?" }
-    ],
-    ideas: [
-      "Create your own 'Azure Inventory' document (spreadsheet or wiki)",
-      "Start a running 'Questions for Manager' doc",
-      "Identify 1-2 areas that feel unclear and document why",
-      "Prepare for your 30-day check-in with specific examples of what you've learned"
-    ]
-  },
-  "Week 5: Deep Dive - Networking": {
-    topic: "Networking",
-    discovery: [
-      { id: "vnet-list", q: "List all VNets, their address spaces, regions, and primary purpose (prod, dev, shared, etc.)." },
-      { id: "nsg-firewall", q: "What are the key NSG / Azure Firewall / third-party firewall rules and their business justification?" },
-      { id: "connectivity", q: "Describe hybrid connectivity (VPN, ExpressRoute, SD-WAN). Any single points of failure?" },
-      { id: "dns-routing", q: "How is DNS handled? Any custom resolvers, split-brain, or on-prem integration?" },
-      { id: "private-link", q: "Which services use Private Endpoints / Private Link? List them and their purpose." },
-      { id: "topology", q: "What is the overall topology (hub-spoke, mesh, Virtual WAN)? Any plans to change it?" },
-      { id: "ownership", q: "Who owns each major network component and who approves changes?" }
-    ],
-    ideas: [
-      "Run these: az network vnet list -o table | az network vnet peering list | az network nsg list",
-      "Export NSG rules for the top 3 VNets into your inventory",
-      "Create (even a simple) network diagram — update it as you learn",
-      "Ask the network team: 'What are the top 3 network risks or debt items right now?'",
-      "Check for any ExpressRoute circuits, VPN gateways, and their redundancy",
-      "Look at data transfer costs between VNets and regions",
-      "Review any WAF, DDoS, or Front Door configurations protecting public endpoints"
-    ]
-  },
+  // Full rich discovery data (questions + ideas per week) now lives in the free Azure backend at /api/kb.
+  // This is kept as a minimal offline fallback only.
+};
+// End of fallback WEEK_DATA. Full structured data is served from the free /api/kb.
+  // (truncated old data - full KB now served from backend)
   "Week 6: Deep Dive - Compute & Storage": {
     topic: "Compute & Storage",
     discovery: [
@@ -709,7 +630,19 @@ function renderPlanTabs() {
   // Ensure discovery answers object exists for this tab
   if (!active.discoveryAnswers) active.discoveryAnswers = {};
 
-  const weekData = WEEK_DATA[active.name] || DEFAULT_WEEK_DATA;
+  // Prefer server KB (free Azure backend) for discovery questions + ideas.
+  // Falls back to local WEEK_DATA or default.
+  let weekData = DEFAULT_WEEK_DATA;
+  const kb = window.ONBOARDING_KB || (KB_CACHE);
+  if (kb && kb.weeks) {
+    // Match by week number extracted from tab name (e.g. "Week 5: ...")
+    const weekMatch = active.name.match(/Week\s*(\d+)/i);
+    const weekNum = weekMatch ? parseInt(weekMatch[1], 10) : null;
+    const kbWeek = weekNum ? kb.weeks.find(w => w.week === weekNum) : null;
+    if (kbWeek) weekData = kbWeek;
+  } else if (WEEK_DATA[active.name]) {
+    weekData = WEEK_DATA[active.name];
+  }
   const topic = weekData.topic || active.name;
 
   let html = `<h3>${escapeHtml(active.name)} <span class="topic-badge">${escapeHtml(topic)}</span></h3>`;
