@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Azure Infrastructure Manager Control Panel</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Space Station / Mission Control extensions - keeping the free dark theme */
+    body { background: linear-gradient(180deg, #09101a 0%, #06101a 100%); }
+    
+    .mission-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      background: rgba(17,27,42,0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    
+    .mission-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .mission-status {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.9rem;
+    }
+    
+    .status-pill {
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(84,167,255,0.15);
+      color: #9cc8ff;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+      padding: 24px 28px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .panel {
+      background: rgba(17, 27, 42, 0.95);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      color: #9cc8ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 240px;
+    }
+    
+    .task-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.92rem;
+    }
+    
+    .task-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .task-list input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+    
+    .task-text {
+      flex: 1;
+    }
+    
+    .task-text.done {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    
+    .add-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .add-form input {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #e7eef7;
+      font-size: 0.9rem;
+    }
+    
+    .add-form button {
+      background: #54a7ff;
+      color: #06101a;
+      border: none;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .action-items {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .action-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+    }
+    
+    .action-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    
+    .priority {
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .priority.p0 { background: #ff6c6c; color: #fff; }
+    .priority.p1 { background: #f5a623; color: #06101a; }
+    .priority.p2 { background: #54a7ff; color: #06101a; }
+    
+    .action-meta {
+      font-size: 0.72rem;
+      color: #7fa8d8;
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    
+    .status-select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e7eef7;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 1px 4px;
+    }
+    
+    .panel-footer {
+      margin-top: auto;
+      padding-top: 8px;
+      font-size: 0.75rem;
+      color: #7fa8d8;
+    }
+    
+    .section-title {
+      font-size: 0.95rem;
+      margin: 16px 0 6px;
+      color: #9cc8ff;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 4px;
+    }
+    
+    .back-link {
+      color: #54a7ff;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+    
+    .telemetry {
+      font-family: monospace;
+      background: rgba(0,0,0,0.3);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="mission-header">
+    <div>
+      <div class="mission-title">
+        🛸 <span>Azure Infrastructure Manager</span><br>
+        <span style="font-size:1.1rem; opacity:0.9;">Control Panel</span>
+      </div>
+      <div style="font-size:0.75rem; color:#7fa8d8; margin-top:4px;">Mission Control • Free Tier • Personal Operations</div>
+    </div>
+    
+    <div class="mission-status">
+      <div>
+        <div class="status-pill" id="currentDayPill">Day -- / 90</div>
+      </div>
+      <a href="index.html" class="back-link">← Back to Runbook</a>
+    </div>
+  </header>
+
+  <main style="max-width:1400px; margin:0 auto; padding:20px 28px;">
+    
+    <!-- Central Telemetry / Status -->
+    <div class="panel" style="margin-bottom:20px; background: linear-gradient(90deg, rgba(17,27,42,0.98), rgba(19,35,60,0.95));">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <h2 style="margin-bottom:4px;">🛰️ Mission Status</h2>
+          <div id="missionSummary" style="font-size:0.95rem; color:#9cc8ff;"></div>
+        </div>
+        <div style="text-align:right; font-size:0.8rem;">
+          <div>Linked to 90-Day Runbook</div>
+          <div style="opacity:0.7;">All data localStorage (free) • Can sync later</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      
+      <!-- Daily Operations -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📅 Daily Operations</h2>
+          <button onclick="addDailyTask()" class="btn btn-secondary" style="padding:4px 10px; font-size:0.8rem;">+ Add</button>
+        </div>
+        <ul id="dailyList" class="task-list"></ul>
+        <div class="panel-footer">Reset daily at midnight (manual for now)</div>
+      </div>
+
+      <!-- Weekly Review -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📆 Weekly Review</h2>
+          <button onclick="addWeeklyTask()" class="btn btn-secondary" style="padding:4px 10px; font-size:0.8rem;">+ Add</button>
+        </div>
+        <ul id="weeklyList" class="task-list"></ul>
+        <div class="panel-footer">Focus on high-impact items from the Runbook</div>
+      </div>
+
+      <!-- Monthly Objectives -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🗓️ Monthly Objectives</h2>
+          <button onclick="addMonthlyTask()" class="btn btn-secondary" style="padding:4px 10px; font-size:0.8rem;">+ Add</button>
+        </div>
+        <ul id="monthlyList" class="task-list"></ul>
+        <div class="panel-footer">Tie directly to your 90-day Goals</div>
+      </div>
+
+      <!-- Action Center (the star - trackable action items) -->
+      <div class="panel" style="grid-column: span 2; min-height: 380px;">
+        <div class="panel-header">
+          <h2>🎯 Action Center — Trackable Items</h2>
+          <button onclick="showAddActionModal()" class="btn" style="padding:6px 12px;">+ New Action Item</button>
+        </div>
+        
+        <div id="actionItems" class="action-items" style="flex:1; overflow-y:auto;"></div>
+        
+        <div class="panel-footer">
+          P0 = Critical (do today) • P1 = High • P2 = Medium • Status changes are logged in your head (or notes)
+        </div>
+      </div>
+
+      <!-- Quick Procedures & Links (space station procedures) -->
+      <div class="panel">
+        <h2>📋 Quick Procedures</h2>
+        <div style="font-size:0.85rem; line-height:1.5;">
+          <div>• <a href="index.html" style="color:#54a7ff;">Open 90-Day Runbook</a> (discovery questions + checklists)</div>
+          <div>• <a href="index.html#goals" style="color:#54a7ff;">Review 90-Day Goals</a></div>
+          <div>• Daily Standup: Review Action Center + Focus Today</div>
+          <div>• Weekly: Update Weekly tasks + Runbook progress</div>
+          <div>• Monthly: Realign with current phase + Goals</div>
+        </div>
+        <div style="margin-top:12px; font-size:0.75rem; color:#7fa8d8;">
+          Pro tip: Use the Runbook's discovery textareas as your "log" for this panel.
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:16px; font-size:0.75rem; color:#7fa8d8;">
+    Azure Infrastructure Manager Control Panel • Free Tier • Mission Control for your 90-day journey • Data stays in your browser (localStorage)
+  </footer>
+
+  <!-- Simple modal for adding action items -->
+  <div id="actionModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:999;">
+    <div style="background:#111b2a; border:1px solid #54a7ff33; border-radius:14px; width:420px; padding:22px;">
+      <h3 style="margin-top:0;">New Action Item</h3>
+      
+      <label style="display:block; font-size:0.85rem; margin-bottom:3px;">Description</label>
+      <input id="actionText" type="text" style="width:100%; margin-bottom:12px;" placeholder="What needs to happen?">
+      
+      <div style="display:flex; gap:12px; margin-bottom:12px;">
+        <div style="flex:1;">
+          <label style="display:block; font-size:0.85rem; margin-bottom:3px;">Priority</label>
+          <select id="actionPriority" style="width:100%;">
+            <option value="p0">P0 - Critical</option>
+            <option value="p1" selected>P1 - High</option>
+            <option value="p2">P2 - Medium</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label style="display:block; font-size:0.85rem; margin-bottom:3px;">Due Date (optional)</label>
+          <input id="actionDue" type="date" style="width:100%;">
+        </div>
+      </div>
+      
+      <label style="display:block; font-size:0.85rem; margin-bottom:3px;">Notes / Context</label>
+      <textarea id="actionNotes" rows="2" style="width:100%; margin-bottom:16px;" placeholder="Any extra context or links..."></textarea>
+      
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="hideAddActionModal()" class="btn btn-secondary">Cancel</button>
+        <button onclick="addActionItem()" class="btn">Create Action Item</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple localStorage persistence - 100% free, works offline
+    const STORAGE_KEY = 'infra-control-panel-v1';
+
+    let state = {
+      daily: [],
+      weekly: [],
+      monthly: [],
+      actions: []
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          state = { ...state, ...JSON.parse(saved) };
+        } catch (e) {}
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // Mission status (reuses the June 29 start date logic if present in localStorage from runbook)
+    function updateMissionStatus() {
+      const pill = document.getElementById('currentDayPill');
+      const summary = document.getElementById('missionSummary');
+
+      // Try to sync with runbook's day calculation if available in localStorage
+      let dayText = 'Day 1+ of 90';
+      try {
+        const start = new Date('2026-06-29');
+        const today = new Date();
+        const diff = Math.floor((today - start) / (1000*60*60*24)) + 1;
+        const day = Math.max(1, Math.min(90, diff));
+        dayText = `Day ${day} of 90`;
+      } catch(e) {}
+
+      pill.textContent = dayText;
+
+      summary.innerHTML = `
+        <strong>Status:</strong> Nominal • <strong>Focus:</strong> Discovery + Execution<br>
+        <span style="font-size:0.8rem; opacity:0.8;">Linked to your 90-Day Runbook. Use this panel for daily/weekly execution rhythm.</span>
+      `;
+    }
+
+    // Daily / Weekly / Monthly renderers (simple but effective)
+    function renderTaskList(type, containerId) {
+      const list = document.getElementById(containerId);
+      list.innerHTML = '';
+
+      const items = state[type] || [];
+      if (items.length === 0) {
+        const li = document.createElement('li');
+        li.innerHTML = `<span style="opacity:0.6; font-style:italic;">No items yet. Add your first one above.</span>`;
+        list.appendChild(li);
+        return;
+      }
+
+      items.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <input type="checkbox" ${item.done ? 'checked' : ''} />
+          <span class="task-text ${item.done ? 'done' : ''}">${item.text}</span>
+          <button class="btn btn-secondary" style="padding:1px 6px; font-size:0.7rem;" onclick="deleteTask('${type}', ${idx})">×</button>
+        `;
+
+        const cb = li.querySelector('input');
+        cb.addEventListener('change', () => {
+          item.done = cb.checked;
+          if (item.done && !item.completedAt) item.completedAt = new Date().toISOString();
+          saveState();
+          renderTaskList(type, containerId);
+        });
+
+        list.appendChild(li);
+      });
+    }
+
+    function addTask(type) {
+      const input = prompt(`Add new ${type} task:`);
+      if (!input || !input.trim()) return;
+
+      state[type] = state[type] || [];
+      state[type].push({
+        text: input.trim(),
+        done: false,
+        added: new Date().toISOString()
+      });
+
+      saveState();
+      renderTaskList(type, `${type}List`);
+    }
+
+    function deleteTask(type, idx) {
+      if (!confirm('Delete this task?')) return;
+      state[type].splice(idx, 1);
+      saveState();
+      renderTaskList(type, `${type}List`);
+    }
+
+    // Action Items - the star of the "space station"
+    function renderActionItems() {
+      const container = document.getElementById('actionItems');
+      container.innerHTML = '';
+
+      const items = (state.actions || []).sort((a, b) => {
+        const prioOrder = { p0: 0, p1: 1, p2: 2 };
+        if (prioOrder[a.priority] !== prioOrder[b.priority]) {
+          return prioOrder[a.priority] - prioOrder[b.priority];
+        }
+        return (a.due || '9999') < (b.due || '9999') ? -1 : 1;
+      });
+
+      if (items.length === 0) {
+        container.innerHTML = `<div style="opacity:0.6; font-style:italic; padding:12px 4px;">No active action items. This is your mission log — add something critical.</div>`;
+        return;
+      }
+
+      items.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'action-item';
+        
+        const statusColor = item.status === 'done' ? 'opacity:0.5; text-decoration:line-through;' : '';
+        
+        div.innerHTML = `
+          <div class="action-header">
+            <strong style="${statusColor}">${item.text}</strong>
+            <span class="priority ${item.priority}">${item.priority.toUpperCase()}</span>
+          </div>
+          ${item.notes ? `<div style="font-size:0.78rem; opacity:0.85; margin:4px 0;">${item.notes}</div>` : ''}
+          <div class="action-meta">
+            <span>Status: 
+              <select class="status-select" onchange="updateActionStatus(${idx}, this.value)">
+                <option value="todo" ${item.status==='todo'?'selected':''}>To Do</option>
+                <option value="progress" ${item.status==='progress'?'selected':''}>In Progress</option>
+                <option value="done" ${item.status==='done'?'selected':''}>Done</option>
+              </select>
+            </span>
+            ${item.due ? `<span>Due: ${item.due}</span>` : ''}
+            <button onclick="deleteAction(${idx})" class="btn btn-secondary" style="padding:1px 5px; font-size:0.65rem; margin-left:auto;">Delete</button>
+          </div>
+        `;
+        
+        container.appendChild(div);
+      });
+    }
+
+    function updateActionStatus(idx, newStatus) {
+      const item = state.actions[idx];
+      item.status = newStatus;
+      if (newStatus === 'done' && !item.completedAt) {
+        item.completedAt = new Date().toISOString();
+      }
+      saveState();
+      renderActionItems();
+    }
+
+    function deleteAction(idx) {
+      if (!confirm('Delete this action item?')) return;
+      state.actions.splice(idx, 1);
+      saveState();
+      renderActionItems();
+    }
+
+    function showAddActionModal() {
+      document.getElementById('actionModal').style.display = 'flex';
+      document.getElementById('actionText').focus();
+    }
+
+    function hideAddActionModal() {
+      document.getElementById('actionModal').style.display = 'none';
+      // clear fields
+      ['actionText','actionNotes','actionDue'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+
+    function addActionItem() {
+      const text = document.getElementById('actionText').value.trim();
+      if (!text) {
+        alert('Description is required');
+        return;
+      }
+
+      const priority = document.getElementById('actionPriority').value;
+      const due = document.getElementById('actionDue').value || null;
+      const notes = document.getElementById('actionNotes').value.trim() || null;
+
+      state.actions = state.actions || [];
+      state.actions.push({
+        id: Date.now(),
+        text,
+        priority,
+        status: 'todo',
+        due,
+        notes,
+        created: new Date().toISOString()
+      });
+
+      saveState();
+      hideAddActionModal();
+      renderActionItems();
+    }
+
+    // Add task helpers
+    window.addDailyTask = () => addTask('daily');
+    window.addWeeklyTask = () => addTask('weekly');
+    window.addMonthlyTask = () => addTask('monthly');
+
+    function init() {
+      loadState();
+
+      // Render all task lists
+      renderTaskList('daily', 'dailyList');
+      renderTaskList('weekly', 'weeklyList');
+      renderTaskList('monthly', 'monthlyList');
+      renderActionItems();
+
+      updateMissionStatus();
+
+      // Optional: seed a couple of example items on first run
+      if (!localStorage.getItem(STORAGE_KEY)) {
+        state.daily = [
+          { text: "Review current Focus Today from Runbook", done: false, added: new Date().toISOString() },
+          { text: "Check 1-2 discovery questions from current week", done: false, added: new Date().toISOString() }
+        ];
+        state.weekly = [
+          { text: "Update Runbook progress + any new discovery answers", done: false, added: new Date().toISOString() }
+        ];
+        saveState();
+        // re-render after seed
+        renderTaskList('daily', 'dailyList');
+        renderTaskList('weekly', 'weeklyList');
+      }
+
+      // Keyboard support for modals
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('actionModal');
+          if (modal.style.display === 'flex') hideAddActionModal();
+        }
+      });
+    }
+
+    // Boot the control panel
+    init();
+  </script>
+</body>
+</html>
