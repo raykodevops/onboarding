@@ -29,6 +29,19 @@ function getCurrentDay() {
   return Math.max(1, Math.min(90, d));
 }
 
+function getDaysUntilStart() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
+
+  if (today >= start) {
+    return 0;
+  }
+
+  const diffMs = start - today;
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+}
+
 const DEFAULT_GOALS = [
   { text: "Complete full Azure environment inventory, resource mapping, and baseline documentation", done: false },
   { text: "Lead and deliver at least one low-risk production improvement (with proposal, testing, metrics, and updated runbooks)", done: false },
@@ -624,8 +637,11 @@ function updateDashboard() {
   let dayText;
   let timelineSub;
   if (currentDay === 0) {
-    dayText = "Starts June 29";
-    timelineSub = `Your first day — tracking begins then (Day 1)`;
+    const daysUntil = getDaysUntilStart();
+    dayText = daysUntil === 1 
+      ? "1 day until start" 
+      : `${daysUntil} days until start`;
+    timelineSub = `First day: June 29, 2026 • Day 1 begins then`;
   } else {
     dayText = `Day ${currentDay} of 90`;
     timelineSub = `${phase} &nbsp;•&nbsp; ${weekLabel}`;
@@ -717,6 +733,7 @@ function updateNdButtons() {
 function renderGoals() {
   const list = document.getElementById('goalsList');
   const progressEl = document.getElementById('goalsProgress');
+  const subtitle = document.getElementById('goalsSubtitle');
   if (!list) return;
 
   list.innerHTML = '';
@@ -726,6 +743,18 @@ function renderGoals() {
 
   if (progressEl) {
     progressEl.textContent = `${doneCount} / ${goals.length} goals complete`;
+  }
+
+  // Dynamic subtitle with days until start counter (before June 29)
+  if (subtitle) {
+    const currentDay = getCurrentDay();
+    if (currentDay === 0) {
+      const daysUntil = getDaysUntilStart();
+      const dayWord = daysUntil === 1 ? 'day' : 'days';
+      subtitle.innerHTML = `Starts <strong>June 29, 2026</strong> • <strong>${daysUntil} ${dayWord} until start</strong> • 3 realistic milestones + your own`;
+    } else {
+      subtitle.innerHTML = `Started <strong>June 29, 2026</strong> • 3 realistic milestones + room for your own`;
+    }
   }
 
   if (!goals.length) {
