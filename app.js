@@ -248,17 +248,38 @@ function showLoginGate() {
 }
 
 async function tryAutoLoadPlan() {
-  if (state.tabs && state.tabs.length) {
+  // Always attempt to load the latest plan definition from the MD file on startup.
+  // If the user already has saved progress (from localStorage), we merge the done states
+  // so that deploying new features or updating the plan content does not wipe completed items.
+  try {
+    const res = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
+    if (!res.ok) throw new Error('Plan file not found');
+
+    const md = await res.text();
+    const freshTabs = parsePlanMarkdown(md);
+
+    if (state.tabs && state.tabs.length) {
+      // Merge previous progress into the fresh plan structure
+      state.tabs = mergeProgressIntoNewPlan(freshTabs);
+    } else {
+      state.tabs = freshTabs;
+    }
+
+    state.activeTab = Math.min(state.activeTab || 0, state.tabs.length - 1);
+    saveLocalPlan();
     renderPlanTabs();
     renderGoals();
     updateDashboard();
     renderFocus();
     return;
-  }
-  try {
-    await fetchPlanFromSite();
-  } catch {
-    // ignore
+  } catch (err) {
+    // Fall back to saved local progress only
+    if (state.tabs && state.tabs.length) {
+      renderPlanTabs();
+      renderGoals();
+      updateDashboard();
+      renderFocus();
+    }
   }
 }
 
@@ -269,14 +290,15 @@ async function fetchPlanFromSite() {
     const res = await fetch('90_Day_Plan_Azure_Infrastructure_Manager.md');
     if (!res.ok) throw new Error('Plan file not found');
     const md = await res.text();
-    state.tabs = parsePlanMarkdown(md);
-    state.activeTab = 0;
+    const freshTabs = parsePlanMarkdown(md);
+    state.tabs = mergeProgressIntoNewPlan(freshTabs);
+    state.activeTab = Math.min(state.activeTab || 0, state.tabs.length - 1);
     saveLocalPlan();
     renderPlanTabs();
     renderGoals();
     updateDashboard();
     renderFocus();
-    message.textContent = `Loaded ${state.tabs.length} plan weeks from site.`;
+    message.textContent = `Loaded ${state.tabs.length} plan weeks from site (progress preserved where possible).`;
   } catch (err) {
     message.textContent = 'Unable to load plan from site. Use local import instead.';
     throw err;
@@ -288,14 +310,15 @@ function handlePlanFile(event) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    state.tabs = parsePlanMarkdown(String(reader.result || ''));
-    state.activeTab = 0;
+    const freshTabs = parsePlanMarkdown(String(reader.result || ''));
+    state.tabs = mergeProgressIntoNewPlan(freshTabs);
+    state.activeTab = Math.min(state.activeTab || 0, state.tabs.length - 1);
     saveLocalPlan();
     renderPlanTabs();
     renderGoals();
     updateDashboard();
     renderFocus();
-    document.getElementById('planMessage').textContent = `Loaded ${state.tabs.length} plan weeks from file.`;
+    document.getElementById('planMessage').textContent = `Loaded ${state.tabs.length} plan weeks from file (progress preserved where possible).`;
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -359,6 +382,52 @@ function parsePlanMarkdown(markdown) {
     }
   }
   return tabs;
+}
+
+/**
+ * When loading a fresh plan (from site or file), merge any existing done states
+ * from the previously saved plan by matching item text. This prevents losing
+ * user progress when we deploy new features or update the source MD file.
+ */
+function mergeProgressIntoNewPlan(newTabs) {
+  const oldTabs = state.tabs || [];
+  if (!oldTabs.length) {
+    return newTabs;
+  }
+
+  return newTabs.map((newTab) => {
+    const oldTab = oldTabs.find((t) => t.name === newTab.name);
+    if (!oldTab) {
+      return newTab; // new week we didn't have before
+    }
+
+    // Preserve goal if it exists
+    if (newTab.goal && !oldTab.goal) {
+      // keep the fresh one
+    }
+
+    // Merge main items by exact text match
+    newTab.items = (newTab.items || []).map((newItem) => {
+      const oldItem = (oldTab.items || []).find((i) => i.text === newItem.text);
+      if (oldItem) {
+        newItem.done = oldItem.done;
+      }
+      return newItem;
+    });
+
+    // Merge meetings separately (they are their own list)
+    if (newTab.meetings && oldTab.meetings) {
+      newTab.meetings = newTab.meetings.map((newMeeting) => {
+        const oldMeeting = oldTab.meetings.find((m) => m.text === newMeeting.text);
+        if (oldMeeting) {
+          newMeeting.done = oldMeeting.done;
+        }
+        return newMeeting;
+      });
+    }
+
+    return newTab;
+  });
 }
 
 function render() {
