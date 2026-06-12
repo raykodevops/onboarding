@@ -5,11 +5,27 @@ const state = {
   user: null,
   // ND-friendly additions (local only)
   focusItems: [],
-  prefs: { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false }
+  prefs: { fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false },
+  goals: []
 };
+
+const START_DATE = new Date('2026-06-29');
 
 let currentPlanFilter = '';
 let focusMode = false;
+
+function getCurrentDay() {
+  const now = new Date();
+  const diffMs = now - START_DATE;
+  let d = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+  return Math.max(1, Math.min(90, d));
+}
+
+const DEFAULT_GOALS = [
+  { text: "Complete full Azure environment inventory, resource mapping, and baseline documentation", done: false },
+  { text: "Lead and deliver at least one low-risk production improvement (with proposal, testing, metrics, and updated runbooks)", done: false },
+  { text: "Build and deliver knowledge transfer to the team (updated runbooks + at least one peer training/review session)", done: false }
+];
 
 window.addEventListener('DOMContentLoaded', async () => {
   loadLocalPlan();           // includes focus + prefs
@@ -20,6 +36,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     await tryAutoLoadPlan();
   }
   render();
+  renderGoals();
   updateDashboard();
   renderFocus();
 });
@@ -90,11 +107,31 @@ function attachHandlers() {
   if (clearFocusBtn) clearFocusBtn.addEventListener('click', () => {
     if (confirm('Clear all Focus Today items?')) {
       state.focusItems = [];
-      savePrefs(); // reuse the prefs saver for simplicity (or dedicated)
+      savePrefs();
       renderFocus();
       updateDashboard();
     }
   });
+
+  // Goals
+  const addGoalBtn = document.getElementById('addGoalBtn');
+  const newGoalInput = document.getElementById('newGoalInput');
+  if (addGoalBtn && newGoalInput) {
+    addGoalBtn.addEventListener('click', () => {
+      const text = newGoalInput.value.trim();
+      if (!text) return;
+      state.goals.push({ text, done: false });
+      newGoalInput.value = '';
+      saveGoals();
+      renderGoals();
+      updateDashboard();
+    });
+    newGoalInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addGoalBtn.click();
+      }
+    });
+  }
 }
 
 async function refreshAuth() {
@@ -192,6 +229,7 @@ function showLoginGate() {
 async function tryAutoLoadPlan() {
   if (state.tabs && state.tabs.length) {
     renderPlanTabs();
+    renderGoals();
     updateDashboard();
     renderFocus();
     return;
@@ -214,6 +252,7 @@ async function fetchPlanFromSite() {
     state.activeTab = 0;
     saveLocalPlan();
     renderPlanTabs();
+    renderGoals();
     updateDashboard();
     renderFocus();
     message.textContent = `Loaded ${state.tabs.length} plan weeks from site.`;
@@ -232,6 +271,7 @@ function handlePlanFile(event) {
     state.activeTab = 0;
     saveLocalPlan();
     renderPlanTabs();
+    renderGoals();
     updateDashboard();
     renderFocus();
     document.getElementById('planMessage').textContent = `Loaded ${state.tabs.length} plan weeks from file.`;
@@ -303,6 +343,7 @@ function parsePlanMarkdown(markdown) {
 function render() {
   renderPlanTabs();
   renderNotes();
+  renderGoals();
   updateDashboard();
   renderFocus();
 }
@@ -543,16 +584,19 @@ function updateDashboard() {
   const container = document.getElementById('ndDashboard');
   if (!container) return;
 
-  let done = 0, total = 0;
+  let planDone = 0, planTotal = 0;
   (state.tabs || []).forEach(tab => {
     (tab.items || []).forEach(it => {
-      if (!it.meta) { total++; if (it.done) done++; }
+      if (!it.meta) { planTotal++; if (it.done) planDone++; }
     });
   });
 
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const planPct = planTotal > 0 ? Math.round((planDone / planTotal) * 100) : 0;
 
-  // Derive phase/week from active tab name
+  const currentDay = getCurrentDay();
+  const dayText = `Day ${currentDay} of 90`;
+
+  // Derive phase/week from active tab name (fallback)
   let phase = 'Phase 1 — Orientation';
   let weekLabel = '—';
   const active = (state.tabs || [])[state.activeTab];
@@ -566,20 +610,31 @@ function updateDashboard() {
     }
   }
 
+  const goals = state.goals || [];
+  const goalsDone = goals.filter(g => g.done).length;
+  const goalsText = goals.length ? `${goalsDone}/${goals.length} goals` : 'No goals yet';
+
   container.innerHTML = `
     <div class="nd-dash-card">
-      <div class="label">OVERALL PROGRESS</div>
-      <div class="big">${pct}%</div>
-      <div class="nd-progress"><div style="width:${pct}%"></div></div>
+      <div class="label">TIMELINE (started June 29, 2026)</div>
+      <div class="big">${dayText}</div>
+      <div style="margin-top:3px;font-size:0.8em;color:var(--muted)">${phase} &nbsp;•&nbsp; ${weekLabel}</div>
     </div>
     <div class="nd-dash-card">
-      <div class="label">CURRENT FOCUS</div>
-      <div class="big">${phase}</div>
-      <div style="margin-top:3px;font-size:0.8em;color:var(--muted)">${weekLabel} &nbsp;•&nbsp; ${done}/${total} items</div>
+      <div class="label">PLAN PROGRESS</div>
+      <div class="big">${planPct}%</div>
+      <div class="nd-progress"><div style="width:${planPct}%"></div></div>
+      <div style="margin-top:3px;font-size:0.78em;color:var(--muted)">${planDone} / ${planTotal} checklist items</div>
     </div>
     <div class="nd-dash-card">
-      <div class="label">QUICK WINS</div>
-      <div style="font-size:0.92em;color:#9cc8ff">Pin up to 3 items in Focus Today</div>
+      <div class="label">GOALS PROGRESS</div>
+      <div class="big">${goalsText}</div>
+      <div style="margin-top:4px;font-size:0.78em;color:#9cc8ff">Track key outcomes for your 90 days</div>
+    </div>
+    <div class="nd-dash-card">
+      <div class="label">FOCUS TODAY</div>
+      <div style="font-size:0.92em;color:#9cc8ff">Pin up to 3 priorities from the plan</div>
+      <div style="margin-top:6px;font-size:0.78em;">Use the Pin buttons below</div>
     </div>
   `;
 }
@@ -642,6 +697,57 @@ function updateNdButtons() {
   // Called from applyPrefs already
 }
 
+function renderGoals() {
+  const list = document.getElementById('goalsList');
+  const progressEl = document.getElementById('goalsProgress');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  const goals = state.goals || [];
+  const doneCount = goals.filter(g => g.done).length;
+
+  if (progressEl) {
+    progressEl.textContent = `${doneCount} / ${goals.length} goals complete`;
+  }
+
+  if (!goals.length) {
+    list.innerHTML = '<li class="muted">No goals yet. Add your first one above.</li>';
+    return;
+  }
+
+  goals.forEach((goal, idx) => {
+    const li = document.createElement('li');
+    const doneClass = goal.done ? 'done' : '';
+    li.innerHTML = `
+      <label class="${doneClass}">
+        <input type="checkbox" data-goal-idx="${idx}" ${goal.done ? 'checked' : ''} />
+        <span class="goal-text">${escapeHtml(goal.text)}</span>
+      </label>
+      <button class="delete-goal" data-goal-idx="${idx}" title="Remove goal">×</button>
+    `;
+
+    const cb = li.querySelector('input');
+    cb.addEventListener('change', () => {
+      state.goals[idx].done = cb.checked;
+      saveGoals();
+      renderGoals();
+      updateDashboard();
+    });
+
+    li.querySelector('.delete-goal').addEventListener('click', () => {
+      if (confirm('Remove this goal?')) {
+        state.goals.splice(idx, 1);
+        saveGoals();
+        renderGoals();
+        updateDashboard();
+      }
+    });
+
+    list.appendChild(li);
+  });
+}
+
 function saveLocalPlan() {
   localStorage.setItem('onboardingPlanTabs', JSON.stringify(state.tabs));
   localStorage.setItem('onboardingActiveTab', String(state.activeTab));
@@ -669,9 +775,26 @@ function loadLocalPlan() {
     const p = localStorage.getItem('onboardingPrefs');
     if (p) state.prefs = Object.assign({ fontScale: 1, compact: false, hideDone: false, calm: false, highContrast: false }, JSON.parse(p));
   } catch {}
+
+  // Goals (with seeding of 3 realistic default goals if none exist)
+  try {
+    const g = localStorage.getItem('onboardingGoals');
+    if (g) {
+      state.goals = JSON.parse(g);
+    }
+  } catch { state.goals = []; }
+
+  if (!state.goals || state.goals.length === 0) {
+    state.goals = DEFAULT_GOALS.map(g => ({ ...g }));
+    saveGoals();
+  }
 }
 
 function savePrefs() {
   localStorage.setItem('onboardingFocusItems', JSON.stringify(state.focusItems || []));
   localStorage.setItem('onboardingPrefs', JSON.stringify(state.prefs || {}));
+}
+
+function saveGoals() {
+  localStorage.setItem('onboardingGoals', JSON.stringify(state.goals || []));
 }

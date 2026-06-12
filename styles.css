@@ -294,8 +294,36 @@ footer.page-footer.hidden {
 
 @media (min-width: 880px) {
   .page-body {
-    grid-template-columns: minmax(360px, 1fr) minmax(360px, 1.2fr);
+    grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.goals-card .checklist li {
+  padding: 8px 0;
+}
+
+.goals-card .goal-text {
+  flex: 1;
+}
+
+.goals-card .delete-goal {
+  background: none;
+  border: none;
+  color: #ff8a8a;
+  font-size: 0.8em;
+  padding: 2px 6px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.goals-card .delete-goal:hover {
+  opacity: 1;
+}
+
+.goal-progress {
+  font-size: 0.85em;
+  color: var(--muted);
+  margin-bottom: 8px;
 }
 
 /* ============================================
