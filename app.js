@@ -832,12 +832,12 @@ function updateDashboard() {
 
   container.innerHTML = `
     <div class="nd-dash-card">
-      <div class="label">TIMELINE (starts June 29, 2026)</div>
+      <div class="label">MISSION TIMELINE (started 29 Jun 2026)</div>
       <div class="big">${dayText}</div>
       <div style="margin-top:3px;font-size:0.8em;color:var(--muted)">${timelineSub}</div>
     </div>
     <div class="nd-dash-card">
-      <div class="label">PLAN PROGRESS</div>
+      <div class="label">EXECUTION STATUS</div>
       <div class="big">${planPct}%</div>
       <div class="nd-progress"><div style="width:${planPct}%"></div></div>
       <div style="margin-top:3px;font-size:0.78em;color:var(--muted)">${planDone} / ${planTotal} checklist items</div>
@@ -845,12 +845,12 @@ function updateDashboard() {
     <div class="nd-dash-card">
       <div class="label">GOALS PROGRESS</div>
       <div class="big">${goalsText}</div>
-      <div style="margin-top:4px;font-size:0.78em;color:#9cc8ff">Track key outcomes for your 90 days</div>
+      <div style="margin-top:4px;font-size:0.78em;color:#9cc8ff">Key mission outcomes tracked</div>
     </div>
     <div class="nd-dash-card">
-      <div class="label">FOCUS TODAY</div>
-      <div style="font-size:0.92em;color:#9cc8ff">Pin up to 3 priorities from the plan</div>
-      <div style="margin-top:6px;font-size:0.78em;">Use the Pin buttons below</div>
+      <div class="label">FOCUS PRIORITIES</div>
+      <div style="font-size:0.92em;color:#9cc8ff">Pin up to 3 active priorities</div>
+      <div style="margin-top:6px;font-size:0.78em;">Use Pin buttons in Plan tabs</div>
     </div>
   `;
 }

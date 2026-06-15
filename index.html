@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Azure Onboarding Runbook</title>
+  <title>Infrastructure Manager Operations Center</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="page-header">
+  <header class="page-header ops-grid">
     <div class="header-left">
       <div class="brand-with-logo">
-        <img src="logo.jpg" alt="Azure Onboarding Logo" class="logo" />
-        <div class="brand">Azure Onboarding Runbook</div>
+        <img src="logo.jpg" alt="Infrastructure Manager Logo" class="logo" />
+        <div class="brand">Infrastructure Manager Operations Center</div>
       </div>
-      <div class="tagline">Authenticated planning, notes, and sync for your Azure onboarding.</div>
+      <div class="tagline">Mission control for Azure infrastructure operations • Planning • Discovery • Execution</div>
     </div>
     <div class="header-actions">
-      <a href="control-panel.html" class="btn btn-secondary" style="text-decoration:none; padding:8px 14px; font-size:0.9em;">🚀 Control Panel</a>
+      <a href="control-panel.html" class="btn btn-secondary" style="text-decoration:none; padding:8px 14px; font-size:0.9em;">🛠️ Control Panel</a>
       <div id="authStatus" class="auth-status">Checking login...</div>
       <div class="button-row">
         <button id="loginBtn" class="btn">Login</button>
@@ -47,8 +47,8 @@
     </div>
 
     <section class="card">
-      <h2>Plan</h2>
-      <p class="muted">Interactive week tabs with Weekly Goals highlighted, separate Meetings lists, progress tracking, and focus pinning.</p>
+      <h2>Plan <span style="font-size:0.6em; opacity:0.7; vertical-align:middle;">— OPERATIONS PLANNING</span></h2>
+      <p class="muted">Week-by-week mission objectives • Discovery questions with live capture • Trackable checklists • Execution support</p>
       <div class="button-row">
         <button id="fetchPlanBtn" class="btn">Load plan from site</button>
         <button id="choosePlanFileBtn" class="btn btn-secondary">Import local plan file</button>
@@ -79,8 +79,8 @@
     </section>
 
     <section class="card">
-      <h2>Notes</h2>
-      <p class="muted">Save notes to Azure storage and load them from anywhere after authentication.</p>
+      <h2>Mission Log</h2>
+      <p class="muted">Cloud-synced notes • Capture findings, decisions, and observations.</p>
       <div class="form-grid">
         <label>
           Title
@@ -102,7 +102,7 @@
 
     <!-- New Goals page / tracker - always visible, tied to your June 29 start -->
     <section class="card goals-card">
-      <h2>90-Day Goals</h2>
+      <h2>Mission Goals</h2>
       <p id="goalsSubtitle" class="muted" style="margin-bottom:4px;"></p>
       <div id="goalsProgress" class="goal-progress"></div>
       <ul id="goalsList" class="checklist"></ul>

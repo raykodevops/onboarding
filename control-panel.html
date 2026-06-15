@@ -3,78 +3,87 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Azure Infrastructure Manager Control Panel</title>
+  <title>Infrastructure Manager Operations Center — Control Panel</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* Space Station / Mission Control extensions - keeping the free dark theme */
-    body { background: linear-gradient(180deg, #09101a 0%, #06101a 100%); }
+    /* Operations Center Theme - Mission Control / Space Station aesthetic */
+    body { 
+      background: linear-gradient(180deg, #09101a 0%, #06101a 100%); 
+    }
     
     .mission-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 28px;
-      background: rgba(17,27,42,0.95);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 28px;
+      background: linear-gradient(90deg, #0a1420, #111b2a);
+      border-bottom: 2px solid rgba(79, 195, 247, 0.25);
     }
     
     .mission-title {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 12px;
+      letter-spacing: 0.5px;
     }
     
     .mission-status {
       display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 0.9rem;
+      align-items: flex-end;
+      gap: 12px;
+      font-size: 0.85rem;
+      text-align: right;
     }
     
     .status-pill {
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: rgba(84,167,255,0.15);
-      color: #9cc8ff;
-      font-size: 0.8rem;
+      font-family: 'Segoe UI Mono', monospace;
+      letter-spacing: 0.75px;
+      padding: 3px 10px;
+      border-radius: 3px;
+      font-size: 0.72rem;
       font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     
     .control-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 18px;
-      padding: 24px 28px;
+      gap: 16px;
+      padding: 20px 28px;
       max-width: 1400px;
       margin: 0 auto;
     }
     
     .panel {
-      background: rgba(17, 27, 42, 0.95);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      background: rgba(17, 27, 42, 0.92);
+      border: 1px solid rgba(79, 195, 247, 0.18);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
       display: flex;
       flex-direction: column;
     }
     
     .panel h2 {
-      margin: 0 0 12px;
-      font-size: 1.05rem;
-      color: #9cc8ff;
+      margin: 0 0 10px;
+      font-size: 0.98rem;
+      color: #4fc3f7;
       display: flex;
       align-items: center;
       gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
     }
     
     .panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.1);
+      padding-bottom: 6px;
     }
     
     .task-list {
@@ -83,16 +92,16 @@
       margin: 0;
       flex: 1;
       overflow-y: auto;
-      max-height: 240px;
+      max-height: 220px;
+      font-size: 0.9rem;
     }
     
     .task-list li {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      font-size: 0.92rem;
+      gap: 8px;
+      padding: 6px 4px;
+      border-bottom: 1px dashed rgba(255,255,255,0.06);
     }
     
     .task-list li:last-child {
@@ -100,41 +109,43 @@
     }
     
     .task-list input[type="checkbox"] {
-      transform: scale(1.2);
+      transform: scale(1.15);
     }
     
     .task-text {
       flex: 1;
+      font-family: system-ui, sans-serif;
     }
     
     .task-text.done {
       text-decoration: line-through;
-      opacity: 0.6;
+      opacity: 0.55;
     }
     
     .add-form {
       display: flex;
-      gap: 8px;
-      margin-top: 12px;
+      gap: 6px;
+      margin-top: 10px;
     }
     
     .add-form input {
       flex: 1;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: 8px 10px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 4px;
+      padding: 6px 8px;
       color: #e7eef7;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
     
     .add-form button {
-      background: #54a7ff;
+      background: #4fc3f7;
       color: #06101a;
       border: none;
-      border-radius: 8px;
-      padding: 0 14px;
-      font-weight: 600;
+      border-radius: 4px;
+      padding: 0 12px;
+      font-weight: 700;
+      font-size: 0.8rem;
       cursor: pointer;
     }
     
@@ -142,94 +153,96 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 320px;
     }
     
     .action-item {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 8px;
-      font-size: 0.88rem;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(79, 195, 247, 0.15);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.82rem;
     }
     
     .action-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     
     .priority {
-      font-size: 0.7rem;
-      padding: 1px 6px;
-      border-radius: 4px;
+      font-size: 0.65rem;
+      padding: 0 5px;
+      border-radius: 2px;
       font-weight: 700;
+      font-family: monospace;
     }
-    .priority.p0 { background: #ff6c6c; color: #fff; }
-    .priority.p1 { background: #f5a623; color: #06101a; }
-    .priority.p2 { background: #54a7ff; color: #06101a; }
+    .priority.p0 { background: #f44336; color: white; }
+    .priority.p1 { background: #ff9800; color: #06101a; }
+    .priority.p2 { background: #4fc3f7; color: #06101a; }
     
     .action-meta {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       color: #7fa8d8;
       display: flex;
-      gap: 12px;
-      margin-top: 4px;
+      gap: 10px;
+      margin-top: 3px;
+      flex-wrap: wrap;
     }
     
     .status-select {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(79, 195, 247, 0.2);
       color: #e7eef7;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      padding: 1px 3px;
+      font-family: monospace;
     }
     
     .panel-footer {
       margin-top: auto;
-      padding-top: 8px;
-      font-size: 0.75rem;
+      padding-top: 6px;
+      font-size: 0.7rem;
       color: #7fa8d8;
-    }
-    
-    .section-title {
-      font-size: 0.95rem;
-      margin: 16px 0 6px;
-      color: #9cc8ff;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      padding-bottom: 4px;
+      border-top: 1px solid rgba(79, 195, 247, 0.1);
+      padding-top: 6px;
     }
     
     .back-link {
-      color: #54a7ff;
+      color: #4fc3f7;
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      font-family: monospace;
     }
     
     .telemetry {
-      font-family: monospace;
-      background: rgba(0,0,0,0.3);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
+      font-family: 'Segoe UI Mono', monospace;
+      background: rgba(0,0,0,0.35);
+      padding: 3px 7px;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
-  <header class="mission-header">
+  <header class="mission-header ops-grid">
     <div>
       <div class="mission-title">
-        🛸 <span>Azure Infrastructure Manager</span><br>
-        <span style="font-size:1.1rem; opacity:0.9;">Control Panel</span>
+        🛰️ <span>Infrastructure Manager</span><br>
+        <span style="font-size:1.1rem; opacity:0.9;">Operations Center</span>
       </div>
-      <div style="font-size:0.75rem; color:#7fa8d8; margin-top:4px;">Mission Control • Free Tier • Personal Operations</div>
+      <div style="font-size:0.75rem; color:#7fa8d8; margin-top:4px;">TELEMETRY • FREE TIER • AZURE INFRASTRUCTURE OPS</div>
     </div>
     
     <div class="mission-status">
       <div>
         <div class="status-pill" id="currentDayPill">Day -- / 90</div>
+        <div class="status-pill status-nominal" style="margin-top:4px; font-size:0.65rem;">SYSTEMS NOMINAL</div>
       </div>
       <a href="index.html" class="back-link">← Back to Runbook</a>
     </div>
