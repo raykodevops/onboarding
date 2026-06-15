@@ -312,7 +312,7 @@ footer.page-footer.hidden {
 
 @media (min-width: 880px) {
   .page-body {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 300px;
   }
 }
 
@@ -547,6 +547,26 @@ footer.page-footer.hidden {
   color: #9cc8ff;
   margin-left: 8px;
   vertical-align: middle;
+}
+
+.plan-section {
+  margin: 10px 0;
+}
+
+.plan-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 0;
+  color: #9cc8ff;
+  outline: none;
+}
+
+.plan-section summary:hover {
+  text-decoration: underline;
+}
+
+.plan-section[open] summary {
+  margin-bottom: 6px;
 }
 
 .plan-meta {

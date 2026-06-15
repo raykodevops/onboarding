@@ -542,12 +542,12 @@ function renderPlanTabs() {
 
   let html = `<h3>${escapeHtml(active.name)} <span class="topic-badge">${escapeHtml(topic)}</span></h3>`;
 
-  // Prominent Weekly Goal (ND gold)
+  // Prominent Weekly Goal (ND gold) - keep small
   if (active.goal) {
     html += `<div class="plan-meta"><strong>🎯 Weekly Goal:</strong> ${escapeHtml(active.goal)}</div>`;
   }
 
-  // Separate Meetings to Schedule (actionable, high value)
+  // Separate Meetings to Schedule - keep small
   if (active.meetings && active.meetings.length) {
     html += `<div style="margin:6px 0 4px;font-size:0.9em;color:#9cc8ff"><strong>Meetings to schedule</strong></div>`;
     html += `<ul class="checklist meetings-list">`;
@@ -560,11 +560,11 @@ function renderPlanTabs() {
     html += `</ul>`;
   }
 
-  // === NEW: Discovery Questions with answer fields ===
+  // === Discovery Questions — PROMINENT and centralized (no need to scroll far) ===
   if (weekData.discovery && weekData.discovery.length) {
-    html += `<div class="discovery-section">
+    html += `<div class="discovery-section" style="margin-top:12px;">
       <h4>🔍 Discovery Questions — Ask & Capture</h4>
-      <p style="margin:0 0 8px;font-size:0.8em;color:#7fa8d8;">These are high-value questions to ask stakeholders and document as you go. Your answers are saved locally.</p>`;
+      <p style="margin:0 0 8px;font-size:0.8em;color:#7fa8d8;">High-value questions for this topic. Answers saved automatically.</p>`;
 
     weekData.discovery.forEach((dq) => {
       const answer = active.discoveryAnswers[dq.id] || '';
@@ -576,8 +576,8 @@ function renderPlanTabs() {
     html += `</div>`;
   }
 
-  // === Existing Week Checklist ===
-  html += `<div style="margin-top:10px;"><strong>Week Checklist</strong></div>`;
+  // === Week Checklist — collapsed by default to keep discovery central ===
+  html += `<details class="plan-section"><summary><strong>Week Checklist</strong> (click to expand)</summary>`;
   html += `<ul class="checklist" id="mainPlanItems">`;
   const filter = (currentPlanFilter || '').toLowerCase();
   const hideDone = !!state.prefs.hideDone;
@@ -596,21 +596,19 @@ function renderPlanTabs() {
       <button class="btn btn-secondary" data-pin-idx="${idx}" style="padding:2px 8px;font-size:0.7em;margin-left:6px;background:rgba(84,167,255,0.12);color:#9cc8ff;border:none;">Pin</button>
     </li>`;
   });
-  html += `</ul>`;
+  html += `</ul></details>`;
 
-  // === NEW: Beneficial Discovery Ideas ===
+  // === Beneficial Discovery Ideas — collapsed by default ===
   if (weekData.ideas && weekData.ideas.length) {
-    html += `<div class="ideas-section">
-      <h4>💡 Beneficial Discovery Ideas</h4>
+    html += `<details class="plan-section"><summary><strong>💡 Beneficial Discovery Ideas</strong> (click to expand)</summary>
       <ul>`;
     weekData.ideas.forEach((idea) => {
-      // Allow simple code highlighting for commands
       const safeIdea = escapeHtml(idea).replace(/`([^`]+)`/g, '<code>$1</code>');
       html += `<li>${safeIdea}</li>`;
     });
     html += `</ul>
-      <p style="margin:6px 0 0;font-size:0.75em;color:#7fa8d8;">Tip: Pin the most useful items to your Focus Today list or add them to your personal checklist.</p>
-    </div>`;
+      <p style="margin:6px 0 0;font-size:0.75em;color:#7fa8d8;">Tip: Pin useful ones to Focus Today.</p>
+    </details>`;
   }
 
   content.innerHTML = html;
