@@ -17,6 +17,20 @@ let currentPlanFilter = '';
 let focusMode = false;
 let KB_CACHE = null;
 
+let hasLoggedInThisSession = false;
+
+async function logAuthEvent(action, details = {}) {
+  try {
+    await fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, details })
+    });
+  } catch (e) {
+    console.warn('Failed to log auth event', e);
+  }
+}
+
 async function loadKnowledgeBase() {
   if (KB_CACHE) return KB_CACHE;
   try {
@@ -247,6 +261,11 @@ async function refreshAuth() {
       }
 
       status.textContent = `Signed in as ${state.user.userDetails || state.user.userId || 'unknown'}`;
+
+      if (!hasLoggedInThisSession) {
+        hasLoggedInThisSession = true;
+        logAuthEvent('login');
+      }
     }
   } catch (err) {
     state.user = null;
@@ -306,7 +325,9 @@ async function showFullPlan() {
 }
 
 function logout() {
-  window.location.href = '/.auth/logout?post_logout_redirect_url=/';
+  logAuthEvent('logout').finally(() => {
+    window.location.href = '/.auth/logout?post_logout_redirect_url=/';
+  });
 }
 
 function showLoginGate() {
