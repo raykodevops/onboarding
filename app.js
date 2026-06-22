@@ -11,6 +11,8 @@ const state = {
 
 const START_DATE = new Date('2026-06-29');
 
+const AZURE_AD_TENANT_ID = '50d1d247-aa75-4931-8ddf-3c2ee9421629';
+
 let currentPlanFilter = '';
 let focusMode = false;
 let KB_CACHE = null;
@@ -215,15 +217,36 @@ async function refreshAuth() {
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
       state.user = data[0];
-      status.textContent = `Signed in as ${state.user.userDetails || state.user.name || 'unknown'}`;
     } else if (data && data.clientPrincipal && typeof data.clientPrincipal === 'object' && Object.keys(data.clientPrincipal).length > 0) {
       state.user = data.clientPrincipal;
-      status.textContent = `Signed in as ${state.user.userDetails || state.user.userId || 'unknown'}`;
     } else {
       state.user = null;
       status.textContent = 'Not signed in';
       showLoginGate();
       return;
+    }
+
+    // Restrict to specific tenant only
+    if (state.user) {
+      let userTenant = state.user.tid || state.user.tenantId;
+      if (!userTenant && Array.isArray(state.user.claims)) {
+        const tidClaim = state.user.claims.find(c => (c.typ || c.claim) === 'tid');
+        if (tidClaim) userTenant = tidClaim.val || tidClaim.value;
+      }
+
+      if (userTenant && userTenant !== AZURE_AD_TENANT_ID) {
+        console.warn('Access denied from tenant:', userTenant);
+        state.user = null;
+        status.textContent = 'Access restricted to authorized organization only.';
+        showLoginGate();
+        // Force logout to clear the session for other tenants
+        setTimeout(() => {
+          window.location.href = '/.auth/logout?post_logout_redirect_url=/';
+        }, 1200);
+        return;
+      }
+
+      status.textContent = `Signed in as ${state.user.userDetails || state.user.userId || 'unknown'}`;
     }
   } catch (err) {
     state.user = null;
@@ -237,7 +260,8 @@ async function refreshAuth() {
 }
 
 function login() {
-  window.location.href = '/.auth/login/aad?post_login_redirect_url=/';
+  // Force login to the specific tenant only
+  window.location.href = `/.auth/login/aad?tenant=${AZURE_AD_TENANT_ID}&post_login_redirect_url=/`;
 }
 
 function hideFullPlan() {

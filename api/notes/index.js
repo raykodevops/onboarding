@@ -33,6 +33,17 @@ module.exports = async function (context, req) {
     return;
   }
 
+  // Restrict to specific tenant only
+  const userTenant = principal.tid || principal.tenantId;
+  const ALLOWED_TENANT = '50d1d247-aa75-4931-8ddf-3c2ee9421629';
+  if (userTenant && userTenant !== ALLOWED_TENANT) {
+    context.res = {
+      status: 403,
+      body: { error: 'Access restricted to authorized organization.' },
+    };
+    return;
+  }
+
   const blobClient = await getBlobClient(principal.userId);
 
   if (req.method === 'GET') {
