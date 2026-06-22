@@ -52,6 +52,23 @@ button, input, textarea {
   font: inherit;
 }
 
+/* Touch-friendly improvements */
+@media (max-width: 879px) {
+  .btn {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .tab-button {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+
+  input[type="text"], textarea {
+    min-height: 44px;
+  }
+}
+
 .page-header {
   display: flex;
   flex-wrap: wrap;
@@ -315,6 +332,94 @@ footer.page-footer.hidden {
 @media (min-width: 880px) {
   .page-body {
     grid-template-columns: 1fr 300px;
+  }
+}
+
+/* Mobile-friendly styles */
+@media (max-width: 879px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .brand-with-logo {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .brand {
+    font-size: 1.1rem;
+  }
+
+  .tagline {
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .page-body {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+    gap: 14px;
+  }
+
+  .nd-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .nd-dash-card .big {
+    font-size: 1.2em;
+  }
+
+  .nd-focus h3 {
+    font-size: 0.9em;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .tab-bar {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+  }
+
+  .tab-button {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .discovery-item textarea {
+    min-height: 60px;
+    font-size: 16px; /* prevent iOS zoom */
+  }
+
+  .nd-focus {
+    padding: 10px;
+  }
+
+  .control-grid {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+  }
+
+  .panel {
+    padding: 14px;
   }
 }
 
