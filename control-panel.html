@@ -361,6 +361,18 @@
         </div>
       </div>
 
+      <!-- Auth Logs Viewer -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🔐 Auth Activity Logs</h2>
+          <button onclick="loadAuthLogs()" class="btn btn-secondary" style="padding:4px 10px; font-size:0.8rem;">Load Recent Logs</button>
+        </div>
+        <div id="authLogsContainer" style="flex:1; overflow-y:auto; max-height:280px; font-size:0.8rem;">
+          <div style="color:#7fa8d8; padding:8px 0;">Click "Load Recent Logs" to view recent sign-ins and sign-outs.</div>
+        </div>
+        <div class="panel-footer">Logs are stored in Azure Blob (auth-logs.jsonl). Only recent entries shown.</div>
+      </div>
+
     </div>
   </main>
 
@@ -646,6 +658,55 @@
           if (modal.style.display === 'flex') hideAddActionModal();
         }
       });
+    }
+
+    async function loadAuthLogs() {
+      const container = document.getElementById('authLogsContainer');
+      container.innerHTML = '<div style="color:#7fa8d8;">Loading logs...</div>';
+
+      try {
+        const res = await fetch('/api/log?limit=30');
+        if (!res.ok) {
+          throw new Error('Failed to load logs');
+        }
+        const data = await res.json();
+        const logs = data.logs || [];
+
+        if (logs.length === 0) {
+          container.innerHTML = '<div style="color:#7fa8d8; padding:8px 0;">No auth logs yet.</div>';
+          return;
+        }
+
+        let html = '<table style="width:100%; border-collapse: collapse; font-size:0.75rem;">';
+        html += '<tr style="background:rgba(79,195,247,0.1);"><th style="text-align:left;padding:4px;">Time</th><th style="text-align:left;padding:4px;">User</th><th style="text-align:left;padding:4px;">Action</th><th style="text-align:left;padding:4px;">IP</th></tr>';
+
+        logs.forEach(log => {
+          const time = new Date(log.timestamp).toLocaleString();
+          const user = log.userDetails || log.userId || 'unknown';
+          const actionColor = log.action === 'login' ? '#4caf50' : '#f44336';
+          html += `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+              <td style="padding:3px 4px; white-space:nowrap;">${time}</td>
+              <td style="padding:3px 4px;">${escapeHtml(user)}</td>
+              <td style="padding:3px 4px;"><span style="color:${actionColor}; font-weight:600;">${log.action}</span></td>
+              <td style="padding:3px 4px; font-family:monospace; font-size:0.7rem;">${log.ip || '-'}</td>
+            </tr>
+          `;
+        });
+
+        html += '</table>';
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = '<div style="color:#f44336;">Failed to load logs. Check console.</div>';
+        console.error(err);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
     }
 
     // Boot the control panel

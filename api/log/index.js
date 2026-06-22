@@ -64,6 +64,36 @@ module.exports = async function (context, req) {
     return;
   }
 
+  if (req.method === 'GET') {
+    // Read recent logs
+    const limit = parseInt(req.query.limit || '50', 10);
+    const logBlobClient = await getLogBlobClient();
+
+    let logs = [];
+    try {
+      const downloadResponse = await logBlobClient.download(0);
+      const content = await streamToString(downloadResponse.readableStreamBody);
+      const lines = content.trim().split('\n').filter(Boolean);
+      // Get last N lines
+      const recentLines = lines.slice(-limit);
+      logs = recentLines.map(line => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      }).filter(Boolean).reverse(); // newest first
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        context.log.error(err);
+      }
+      // If no logs yet, return empty
+    }
+
+    context.res = { status: 200, body: { logs } };
+    return;
+  }
+
   if (req.method === 'POST') {
     const { action, details } = req.body || {};
     if (!action) {
@@ -88,5 +118,5 @@ module.exports = async function (context, req) {
     return;
   }
 
-  context.res = { status: 405, body: { error: 'Method not allowed. Use POST.' } };
+  context.res = { status: 405, body: { error: 'Method not allowed. Use GET or POST.' } };
 };
